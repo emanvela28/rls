@@ -67,6 +67,7 @@ def verify_token(
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid token header.")
     kid = unverified_header.get("kid")
+    alg = unverified_header.get("alg") or "RS256"
     key = next((k for k in get_jwks() if k.get("kid") == kid), None)
     if not key:
         raise HTTPException(status_code=401, detail="Unknown token key.")
@@ -74,7 +75,7 @@ def verify_token(
         payload = jwt.decode(
             token,
             key,
-            algorithms=["RS256"],
+            algorithms=[alg],
             options={"verify_aud": False, "verify_iss": False},
         )
     except Exception:
