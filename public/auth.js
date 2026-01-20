@@ -22,11 +22,13 @@
     banner.id = "authBanner";
     banner.className = "auth-banner";
     banner.innerHTML = `
-      <div>
-        <strong>Sign in required.</strong>
-        <span>Use your company Google account to continue.</span>
+      <div class="auth-card">
+        <div>
+          <strong>Sign in required.</strong>
+          <span>Use your company Google account to continue.</span>
+        </div>
+        <button id="authLoginBtn" type="button">Sign in with Google</button>
       </div>
-      <button id="authLoginBtn" type="button">Sign in with Google</button>
     `;
     document.body.appendChild(banner);
     banner.querySelector("#authLoginBtn").addEventListener("click", () => {
@@ -43,6 +45,10 @@
     if (banner) banner.remove();
   };
 
+  const setAppVisibility = (isAuthed) => {
+    document.body.classList.toggle("auth-locked", !isAuthed);
+  };
+
   const getAccessToken = async () => {
     if (!currentSession) {
       const { data } = await supabase.auth.getSession();
@@ -54,10 +60,12 @@
   const authReady = new Promise((resolve) => {
     supabase.auth.onAuthStateChange((_event, session) => {
       currentSession = session || null;
+      setAppVisibility(!!currentSession);
       resolve(true);
     });
     supabase.auth.getSession().then(({ data }) => {
       currentSession = data.session || null;
+      setAppVisibility(!!currentSession);
       resolve(true);
     });
   });
@@ -66,6 +74,7 @@
     await authReady;
     const token = await getAccessToken();
     if (!token) {
+      setAppVisibility(false);
       ensureAuthBanner();
       throw new Error("Not authenticated");
     }

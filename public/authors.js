@@ -43,17 +43,28 @@ const renderAuthorTable = (items) => {
   items.forEach((author) => {
     const row = document.createElement("tr");
     row.className = "clickable-row";
+    row.dataset.authorKey = normalize(author.name);
     row.innerHTML = `
       <td>${author.name}</td>
       <td>${author.email || "—"}</td>
       <td>${author.total.toLocaleString()}</td>
     `;
-    row.addEventListener("click", () => renderStats(author));
     fragment.appendChild(row);
   });
   authorsBody.appendChild(fragment);
   authorCount.textContent = `${items.length.toLocaleString()} authors`;
 };
+
+authorsBody.addEventListener("click", (event) => {
+  const row = event.target.closest("tr");
+  if (!row) return;
+  const key = row.dataset.authorKey || "";
+  if (!key) return;
+  const author = authors.find((entry) => normalize(entry.name) === key);
+  if (!author) return;
+  console.log("Author row clicked (delegated):", author.name);
+  renderStats(author);
+});
 
 const renderStats = (author) => {
   authorStats.removeAttribute("hidden");
@@ -77,6 +88,12 @@ const renderStats = (author) => {
     `;
     statusTableBody.appendChild(row);
   });
+
+  try {
+    authorStats.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (err) {
+    console.error("Failed to scroll to author stats:", err);
+  }
 };
 
 const applyAuthorFilter = () => {

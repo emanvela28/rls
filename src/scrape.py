@@ -11,6 +11,8 @@ import requests
 from dotenv import load_dotenv
 
 URL = "https://api.studio.mercor.com/tasks/world/world_2cb0dbfca8494125bc1b71f0f3472a76/detailed"
+CLAIMABLE_URL = "https://api.studio.mercor.com/worlds/claimable?campaign_id={campaign_id}"
+QUERY_RESULTS_CSV = "query-results-1768937796985.csv"
 OUT_FILE = "data/data.txt"
 OUT_JSON = "data/data.json"
 OUT_CSV = "data/data.csv"
@@ -135,6 +137,48 @@ def load_campaign_users(headers, campaign_id):
     return email_by_name
 
 
+def load_claimable_authors(headers, campaign_id):
+    url = CLAIMABLE_URL.format(campaign_id=campaign_id)
+    r = requests.get(url, headers=headers, timeout=60)
+    if r.status_code == 401:
+        raise SystemExit("401 Unauthorized while loading claimable tasks.")
+    r.raise_for_status()
+    payload = r.json()
+    task_map = {}
+    if isinstance(payload, list):
+        items = payload
+    else:
+        items = payload.get("tasks", []) if isinstance(payload, dict) else []
+    for item in items:
+        task_id = item.get("task_id") or item.get("id")
+        author_name = item.get("original_author_name") or ""
+        author_id = item.get("original_author_id") or ""
+        if task_id and author_name:
+            task_map[task_id] = {
+                "original_author_name": author_name,
+                "original_author_id": author_id,
+            }
+    return task_map
+
+
+def load_query_results_authors():
+    if not os.path.exists(QUERY_RESULTS_CSV):
+        return {}
+    task_map = {}
+    with open(QUERY_RESULTS_CSV, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            task_id = (row.get("task_id") or "").strip()
+            author_name = (row.get("original_author_name") or "").strip()
+            author_id = (row.get("original_author_id") or "").strip()
+            if task_id and author_name:
+                task_map[task_id] = {
+                    "original_author_name": author_name,
+                    "original_author_id": author_id,
+                }
+    return task_map
+
+
 def tsv_row(values):
     cleaned = []
     for v in values:
@@ -197,6 +241,8 @@ def main():
     headers["Authorization"] = f"Bearer {api_key}"
 
     users_email_by_name = load_campaign_users(headers, campaign_id)
+    claimable_authors = load_claimable_authors(headers, campaign_id)
+    query_authors = load_query_results_authors()
     r = requests.get(URL, headers=headers, timeout=60)
 
     # If 401, print the server message (e.g. "Token has expired") and exit
@@ -302,6 +348,10 @@ def main():
         display_author = original_author
         if not display_author and status_name == "Awaiting Review":
             display_author = t.get("updated_by_user_name")
+        if task_id in query_authors:
+            display_author = query_authors[task_id]["original_author_name"]
+        elif task_id in claimable_authors:
+            display_author = claimable_authors[task_id]["original_author_name"]
         display_author_email = users_email_by_name.get(
             normalize_name(display_author), ""
         )

@@ -116,28 +116,35 @@ body {
 
 .auth-banner {
   position: fixed;
-  left: 24px;
-  right: 24px;
-  bottom: 24px;
-  z-index: 20;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  background: #f7f3ff;
+}
+
+.auth-card {
   background: #ffffff;
   border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 14px 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
+  border-radius: 18px;
+  padding: 22px 24px;
+  display: grid;
+  gap: 14px;
+  min-width: min(360px, 90vw);
   box-shadow: var(--shadow);
 }
 
-.auth-banner span {
+.auth-locked .page {
+  display: none;
+}
+
+.auth-card span {
   color: var(--muted);
   display: block;
   font-size: 0.9rem;
 }
 
-.auth-banner button {
+.auth-card button {
   background: var(--accent);
   color: #ffffff;
   border: none;
@@ -147,7 +154,7 @@ body {
   cursor: pointer;
 }
 
-.auth-banner button:hover {
+.auth-card button:hover {
   filter: brightness(1.05);
 }
 
