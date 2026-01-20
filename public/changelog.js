@@ -56,3 +56,12 @@ downloadCsv.addEventListener("click", async () => {
     alert("CSV download failed. Please sign in and try again.");
   }
 });
+
+const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    if (window.signOut) {
+      window.signOut();
+    }
+  });
+}

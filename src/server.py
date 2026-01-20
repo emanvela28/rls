@@ -26,12 +26,15 @@ JWKS_CACHE = {"expires_at": 0, "keys": []}
 def get_jwks():
     if not SUPABASE_URL:
         raise RuntimeError("SUPABASE_URL is not set.")
+    if not SUPABASE_ANON_KEY:
+        raise RuntimeError("SUPABASE_ANON_KEY is not set.")
     now = time.time()
     if JWKS_CACHE["expires_at"] > now and JWKS_CACHE["keys"]:
         return JWKS_CACHE["keys"]
-    headers = {}
-    if SUPABASE_ANON_KEY:
-        headers["apikey"] = SUPABASE_ANON_KEY
+    headers = {
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": f"Bearer {SUPABASE_ANON_KEY}",
+    }
     resp = requests.get(f"{SUPABASE_URL}/auth/v1/keys", headers=headers, timeout=15)
     resp.raise_for_status()
     keys = resp.json().get("keys", [])

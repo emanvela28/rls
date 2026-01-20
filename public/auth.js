@@ -62,4 +62,9 @@
     }
     return response;
   };
+
+  window.signOut = async () => {
+    await supabase.auth.signOut();
+    window.location.reload();
+  };
 })();

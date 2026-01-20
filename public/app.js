@@ -223,3 +223,12 @@ headers.forEach((header) => {
     applyFilters();
   });
 });
+
+const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    if (window.signOut) {
+      window.signOut();
+    }
+  });
+}

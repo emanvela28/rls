@@ -104,3 +104,12 @@ window.authFetch("/api/data")
   });
 
 authorSearch.addEventListener("input", applyAuthorFilter);
+
+const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    if (window.signOut) {
+      window.signOut();
+    }
+  });
+}
