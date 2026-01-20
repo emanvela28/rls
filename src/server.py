@@ -52,7 +52,12 @@ def get_email_domain(email: str) -> str:
     return email.split("@", 1)[1].lower()
 
 
-def verify_token(authorization: str = Header(default="")):
+def verify_token(
+    authorization: str = Header(default=""),
+    x_auth_token: str = Header(default="", alias="X-Auth-Token"),
+):
+    if not authorization and x_auth_token:
+        authorization = f"Bearer {x_auth_token}"
     if not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing bearer token.")
     token = authorization.split(" ", 1)[1].strip()
