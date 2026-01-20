@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mercor Tasks Snapshot</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/config.js"></script>
+  </head>
+  <body>
+    <div class="bg-orb bg-orb--one" aria-hidden="true"></div>
+    <div class="bg-orb bg-orb--two" aria-hidden="true"></div>
+    <main class="page">
+      <header class="hero">
+        <p class="eyebrow">World Snapshot</p>
+        <h1>Mercor Tasks</h1>
+        <p class="subtitle">
+          Real-time view of status, ownership, and updates pulled from the
+          Mercor API.
+        </p>
+        <div class="meta">
+          <span id="generatedAt">Updated: —</span>
+          <span id="rowCount">Rows: —</span>
+        </div>
+        <div class="hero-actions">
+          <a class="btn-primary" href="/changelog">Change Log</a>
+          <a class="btn-ghost" href="/authors">Authors</a>
+        </div>
+      </header>
+
+      <section class="panel">
+        <div class="controls">
+          <label class="control">
+            <span>Search</span>
+            <input
+              id="searchInput"
+              type="search"
+              placeholder="Task name, owner, status, or ID"
+            />
+          </label>
+          <label class="control">
+            <span>Status</span>
+            <select id="statusFilter">
+              <option value="all">All statuses</option>
+            </select>
+          </label>
+        </div>
+        <div class="stats" id="stats"></div>
+        <div class="chips" id="statusChips"></div>
+      </section>
+
+      <section class="table-panel">
+        <div class="table-header">
+          <h2>Tasks</h2>
+          <div class="table-actions">
+            <span id="visibleCount">Showing —</span>
+            <label class="control compact">
+              <span>Rows</span>
+              <select id="pageSize">
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th data-key="task_name">Task</th>
+                <th data-key="status_name">Status</th>
+                <th data-key="original_author">Original Author</th>
+                <th data-key="verifier_count">Verifier</th>
+                <th data-key="final_score">Score</th>
+                <th data-key="has_gt_grade">GT</th>
+                <th data-key="updated_at">Updated</th>
+                <th data-key="task_id">ID</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+        <div class="pager">
+          <button id="prevPage" type="button">Previous</button>
+          <span id="pageInfo">Page —</span>
+          <button id="nextPage" type="button">Next</button>
+        </div>
+      </section>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/static/auth.js"></script>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

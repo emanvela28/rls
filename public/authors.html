@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Author Stats</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/config.js"></script>
+  </head>
+  <body>
+    <div class="bg-orb bg-orb--one" aria-hidden="true"></div>
+    <div class="bg-orb bg-orb--two" aria-hidden="true"></div>
+    <main class="page">
+      <header class="hero">
+        <p class="eyebrow">Contributor View</p>
+        <h1>Author Stats</h1>
+        <p class="subtitle">
+          Click an author to see how many tasks they have in each status.
+        </p>
+        <div class="hero-actions">
+          <a class="btn-ghost" href="/">Back to Tasks</a>
+        </div>
+      </header>
+
+      <section class="panel">
+        <div class="controls">
+          <label class="control">
+            <span>Search Authors</span>
+            <input id="authorSearch" type="search" placeholder="Name or email" />
+          </label>
+        </div>
+      </section>
+
+      <section class="table-panel">
+        <div class="table-header">
+          <h2>Authors</h2>
+          <span id="authorCount">— authors</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Author</th>
+                <th>Email</th>
+                <th>Total Tasks</th>
+              </tr>
+            </thead>
+            <tbody id="authorsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" id="authorStats" hidden>
+        <div class="table-header">
+          <h2 id="statsTitle">Author</h2>
+          <span id="statsTotal">— tasks</span>
+        </div>
+        <div class="stats" id="statusStats"></div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Count</th>
+              </tr>
+            </thead>
+            <tbody id="statusTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/static/auth.js"></script>
+    <script src="/static/authors.js"></script>
+  </body>
+</html>

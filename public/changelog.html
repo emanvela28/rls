@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Approval Change Log</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/config.js"></script>
+  </head>
+  <body>
+    <div class="bg-orb bg-orb--one" aria-hidden="true"></div>
+    <div class="bg-orb bg-orb--two" aria-hidden="true"></div>
+    <main class="page">
+      <header class="hero">
+        <p class="eyebrow">Audit Trail</p>
+        <h1>Approval Change Log</h1>
+        <p class="subtitle">
+          Every task that reaches Approved, captured with the original author
+          and the approval timestamp.
+        </p>
+        <div class="hero-actions">
+          <a class="btn-ghost" href="/">Back to Tasks</a>
+        </div>
+      </header>
+
+      <section class="table-panel">
+        <div class="table-header">
+          <h2>Approvals</h2>
+          <div class="table-actions">
+            <span id="changelogCount">— entries</span>
+            <button class="btn-primary" id="downloadCsv" type="button">
+              Export CSV
+            </button>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Original Author</th>
+                <th>Email</th>
+                <th>Approved At</th>
+                <th>ID</th>
+              </tr>
+            </thead>
+            <tbody id="changelogBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/static/auth.js"></script>
+    <script src="/static/changelog.js"></script>
+  </body>
+</html>
