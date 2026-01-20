@@ -35,7 +35,10 @@ def get_jwks():
         "apikey": SUPABASE_ANON_KEY,
         "Authorization": f"Bearer {SUPABASE_ANON_KEY}",
     }
-    resp = requests.get(f"{SUPABASE_URL}/auth/v1/keys", headers=headers, timeout=15)
+    base = SUPABASE_URL.rstrip("/")
+    resp = requests.get(f"{base}/auth/v1/keys", headers=headers, timeout=15)
+    if resp.status_code == 404:
+        resp = requests.get(f"{base}/auth/v1/.well-known/jwks.json", headers=headers, timeout=15)
     resp.raise_for_status()
     keys = resp.json().get("keys", [])
     JWKS_CACHE["keys"] = keys
