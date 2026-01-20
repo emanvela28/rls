@@ -22,6 +22,8 @@ Deployment (Render + Supabase Auth)
 3) Data refresh
 - Run `python3 src/scrape.py` locally and push the updated `data/` files, or
 - Add a scheduled job in Render to run `python3 src/scrape.py` (requires the same env vars as scrape).
+  - A cron job is defined in `render.yaml` to run every 30 minutes.
+  - You can change the schedule in `render.yaml` under `cron`.
 
 Notes
 - The frontend pulls data from `/api/data` and `/api/changelog`, which require a valid Supabase JWT.
