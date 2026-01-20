@@ -69,11 +69,13 @@ def verify_token(authorization: str = Header(default="")):
             token,
             key,
             algorithms=["RS256"],
-            audience="authenticated",
-            issuer=f"{SUPABASE_URL}/auth/v1",
+            options={"verify_aud": False, "verify_iss": False},
         )
     except Exception:
         raise HTTPException(status_code=401, detail="Token verification failed.")
+    iss = (payload.get("iss") or "").rstrip("/")
+    if not iss.startswith(SUPABASE_URL.rstrip("/")):
+        raise HTTPException(status_code=401, detail="Invalid token issuer.")
     email = payload.get("email") or ""
     if ALLOWED_EMAIL_DOMAINS:
         if get_email_domain(email) not in ALLOWED_EMAIL_DOMAINS:

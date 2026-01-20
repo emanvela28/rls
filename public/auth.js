@@ -13,6 +13,8 @@
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   window.supabaseClient = supabase;
 
+  let currentSession = null;
+
   const ensureAuthBanner = () => {
     let banner = document.getElementById("authBanner");
     if (banner) return banner;
@@ -42,11 +44,26 @@
   };
 
   const getAccessToken = async () => {
-    const { data } = await supabase.auth.getSession();
-    return data.session?.access_token || "";
+    if (!currentSession) {
+      const { data } = await supabase.auth.getSession();
+      currentSession = data.session || null;
+    }
+    return currentSession?.access_token || "";
   };
 
+  const authReady = new Promise((resolve) => {
+    supabase.auth.onAuthStateChange((_event, session) => {
+      currentSession = session || null;
+      resolve(true);
+    });
+    supabase.auth.getSession().then(({ data }) => {
+      currentSession = data.session || null;
+      resolve(true);
+    });
+  });
+
   window.authFetch = async (url, options = {}) => {
+    await authReady;
     const token = await getAccessToken();
     if (!token) {
       ensureAuthBanner();
