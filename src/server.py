@@ -29,7 +29,10 @@ def get_jwks():
     now = time.time()
     if JWKS_CACHE["expires_at"] > now and JWKS_CACHE["keys"]:
         return JWKS_CACHE["keys"]
-    resp = requests.get(f"{SUPABASE_URL}/auth/v1/keys", timeout=15)
+    headers = {}
+    if SUPABASE_ANON_KEY:
+        headers["apikey"] = SUPABASE_ANON_KEY
+    resp = requests.get(f"{SUPABASE_URL}/auth/v1/keys", headers=headers, timeout=15)
     resp.raise_for_status()
     keys = resp.json().get("keys", [])
     JWKS_CACHE["keys"] = keys

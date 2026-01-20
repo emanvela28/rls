@@ -26,3 +26,8 @@ Deployment (Render + Supabase Auth)
 Notes
 - The frontend pulls data from `/api/data` and `/api/changelog`, which require a valid Supabase JWT.
 - Only users with emails matching ALLOWED_EMAIL_DOMAIN can access the API.
+
+Supabase redirect URLs for this app
+- https://rls-81e2.onrender.com/
+- https://rls-81e2.onrender.com/changelog
+- https://rls-81e2.onrender.com/authors
