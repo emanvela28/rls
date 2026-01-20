@@ -72,6 +72,9 @@
     const headers = new Headers(options.headers || {});
     headers.set("Authorization", `Bearer ${token}`);
     headers.set("X-Auth-Token", token);
+    if (url.includes("/api/data") && window.location.search.includes("debug=1")) {
+      headers.set("X-Auth-Debug", "1");
+    }
     const response = await fetch(url, { ...options, headers });
     if (response.status === 401 || response.status === 403) {
       ensureAuthBanner();
