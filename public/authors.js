@@ -14,9 +14,9 @@ const normalize = (value) => (value || "").toLowerCase();
 const buildAuthors = (tasks) => {
   const map = new Map();
   tasks.forEach((task) => {
-    const name = task.original_author;
+    const name = task.owned_by_user_name;
     if (!name) return;
-    const email = task.original_author_email || "";
+    const email = task.owned_by_user_email || "";
     const status = task.status_name || "Unknown";
     const key = normalize(name);
     if (!map.has(key)) {

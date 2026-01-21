@@ -95,7 +95,7 @@ const renderTable = (tasks) => {
     row.innerHTML = `
       <td>${task.task_name || "—"}</td>
       <td><span class="status-pill">${task.status_name || "Unknown"}</span></td>
-      <td>${task.original_author || "—"}</td>
+      <td>${task.owned_by_user_name || "—"}</td>
       <td>${task.verifier_count ?? "—"}</td>
       <td>${task.final_score ?? "—"}</td>
       <td class="${task.has_gt_grade ? "gt-true" : "gt-false"}">${
@@ -147,7 +147,7 @@ const applyFilters = () => {
     const haystack = [
       task.task_name,
       task.status_name,
-      task.original_author,
+      task.owned_by_user_name,
       task.task_id,
     ]
       .filter(Boolean)
@@ -182,7 +182,7 @@ window.authFetch("/api/data")
   })
   .catch((err) => {
     tableBody.innerHTML = `<tr><td colspan="8">Failed to load data.json: ${err}</td></tr>`;
-});
+  });
 
 searchInput.addEventListener("input", () => {
   currentPage = 1;

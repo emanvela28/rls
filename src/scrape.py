@@ -11,7 +11,6 @@ import requests
 from dotenv import load_dotenv
 
 URL = "https://api.studio.mercor.com/tasks/world/world_2cb0dbfca8494125bc1b71f0f3472a76/detailed"
-CLAIMABLE_URL = "https://api.studio.mercor.com/worlds/claimable?campaign_id={campaign_id}"
 OUT_FILE = "data/data.txt"
 OUT_JSON = "data/data.json"
 OUT_CSV = "data/data.csv"
@@ -19,6 +18,7 @@ OUT_CHANGELOG_JSON = "data/changelog.json"
 OUT_CHANGELOG_CSV = "data/changelog.csv"
 DB_FILE = "data/tasks.db"
 USERS_URL_TEMPLATE = "https://api.studio.mercor.com/users/campaign/{campaign_id}"
+AUTHOR_CUSTOM_FIELD_ID = "field_f149502069bd4fde84cc33a35373fd83"
 
 
 def load_api_key() -> str:
@@ -118,6 +118,18 @@ def normalize_name(name: str) -> str:
     return " ".join(name.lower().split())
 
 
+def resolve_owner_name(task: dict) -> str:
+    owned_by = (task.get("owned_by_user_name") or "").strip()
+    if owned_by:
+        return owned_by
+    custom_fields = task.get("custom_fields") or {}
+    if isinstance(custom_fields, dict):
+        custom_owner = custom_fields.get(AUTHOR_CUSTOM_FIELD_ID)
+        if isinstance(custom_owner, str) and custom_owner.strip():
+            return custom_owner.strip()
+    return ""
+
+
 def load_campaign_users(headers, campaign_id):
     url = USERS_URL_TEMPLATE.format(campaign_id=campaign_id)
     r = requests.get(url, headers=headers, timeout=60)
@@ -134,30 +146,6 @@ def load_campaign_users(headers, campaign_id):
         if full and email:
             email_by_name[full] = email
     return email_by_name
-
-
-def load_claimable_authors(headers, campaign_id):
-    url = CLAIMABLE_URL.format(campaign_id=campaign_id)
-    r = requests.get(url, headers=headers, timeout=60)
-    if r.status_code == 401:
-        raise SystemExit("401 Unauthorized while loading claimable tasks.")
-    r.raise_for_status()
-    payload = r.json()
-    task_map = {}
-    if isinstance(payload, list):
-        items = payload
-    else:
-        items = payload.get("tasks", []) if isinstance(payload, dict) else []
-    for item in items:
-        task_id = item.get("task_id") or item.get("id")
-        author_name = item.get("original_author_name") or ""
-        author_id = item.get("original_author_id") or ""
-        if task_id and author_name:
-            task_map[task_id] = {
-                "original_author_name": author_name,
-                "original_author_id": author_id,
-            }
-    return task_map
 
 
 def tsv_row(values):
@@ -254,11 +242,10 @@ def main():
     columns = [
         "task_name",
         "status_name",  # from task_status_defn.status_name
-        "original_author",
-        "original_author_email",
         "created_by_user_name",
         "updated_by_user_name",
         "owned_by_user_name",
+        "owned_by_user_email",
         "verifier_count",
         "final_score",
         "has_gt_grade",
@@ -287,32 +274,21 @@ def main():
         task_id = t.get("task_id")
         prev = state.get(task_id, {})
         prev_status = prev.get("last_status")
-        original_author = prev.get("original_author")
-        newly_set = False
-        if (
-            not original_author
-            and prev.get("last_status") == "Seed Status"
-            and status_name
-            and status_name != "Seed Status"
-        ):
-            updated_by = t.get("updated_by_user_name")
-            if updated_by:
-                original_author = updated_by
-                newly_set = True
-
         if task_id:
             persist_task_state(
                 conn,
                 task_id,
                 status_name,
-                original_author,
-                ts if newly_set else None,
+                prev.get("original_author"),
+                None,
             )
 
         if task_id and status_name == "Approved":
             if task_id not in approved_ids:
-                approval_author = original_author or t.get("updated_by_user_name") or ""
-                approval_email = users_email_by_name.get(normalize_name(approval_author), "")
+                approval_author = resolve_owner_name(t)
+                approval_email = users_email_by_name.get(
+                    normalize_name(approval_author), ""
+                )
                 approved_at = t.get("updated_at") or ts
                 append_approval_log(
                     conn,
@@ -324,21 +300,16 @@ def main():
                 )
                 approved_ids.add(task_id)
 
-        display_author = original_author
-        if t.get("owned_by_user_name"):
-            display_author = t.get("owned_by_user_name")
-        display_author_email = users_email_by_name.get(
-            normalize_name(display_author), ""
-        )
+        owned_by_name = resolve_owner_name(t)
+        owned_by_email = users_email_by_name.get(normalize_name(owned_by_name), "")
 
         row = [
             t.get("task_name"),
             status_name,
-            display_author or "",
-            display_author_email,
             t.get("created_by_user_name"),
             t.get("updated_by_user_name"),
-            t.get("owned_by_user_name"),
+            owned_by_name,
+            owned_by_email,
             t.get("verifier_count"),
             t.get("final_score"),
             t.get("has_gt_grade"),
@@ -351,11 +322,10 @@ def main():
             {
                 "task_name": t.get("task_name"),
                 "status_name": status_name,
-                "original_author": display_author,
-                "original_author_email": display_author_email,
                 "created_by_user_name": t.get("created_by_user_name"),
                 "updated_by_user_name": t.get("updated_by_user_name"),
-                "owned_by_user_name": t.get("owned_by_user_name"),
+                "owned_by_user_name": owned_by_name,
+                "owned_by_user_email": owned_by_email,
                 "verifier_count": t.get("verifier_count"),
                 "final_score": t.get("final_score"),
                 "has_gt_grade": t.get("has_gt_grade"),
