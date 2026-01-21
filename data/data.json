@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-21 06:26:12 UTC",
+  "generated_at": "2026-01-21 08:36:46 UTC",
   "url": "https://api.studio.mercor.com/tasks/world/world_2cb0dbfca8494125bc1b71f0f3472a76/detailed",
   "rows_returned": 2073,
   "tasks": [
@@ -98,7 +98,7 @@
       "final_score": null,
       "has_gt_grade": false,
       "created_at": "2026-01-18T06:13:40.086274Z",
-      "updated_at": "2026-01-21T06:24:51.205701Z",
+      "updated_at": "2026-01-21T06:28:30.710604Z",
       "task_id": "task_00f1523945764e30b48f478138ebe81c"
     },
     {
@@ -243,7 +243,7 @@
     },
     {
       "task_name": "Fatty-liver_CT_Abdomen_1152",
-      "status_name": "Pending",
+      "status_name": "Awaiting Review",
       "created_by_user_name": "Saatvik Nagpal",
       "updated_by_user_name": "Tu Thao Pham",
       "owned_by_user_name": "Tu Thao Pham",
@@ -252,7 +252,7 @@
       "final_score": null,
       "has_gt_grade": false,
       "created_at": "2026-01-18T06:17:25.038672Z",
-      "updated_at": "2026-01-21T05:57:34.092364Z",
+      "updated_at": "2026-01-21T08:10:10.642872Z",
       "task_id": "task_02a91a8912884f4f962e947a1e52e0f9"
     },
     {

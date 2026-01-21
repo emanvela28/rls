@@ -97,19 +97,35 @@ def persist_task_state(conn, task_id, last_status, original_author, set_at):
     )
 
 
-def append_approval_log(conn, task_id, task_name, original_author, original_author_email, approved_at):
+def append_approval_log(
+    conn,
+    task_id,
+    task_name,
+    original_author,
+    original_author_email,
+    approved_at,
+):
     conn.execute(
         """
-        INSERT OR IGNORE INTO approvals_log (task_id, task_name, original_author, original_author_email, approved_at)
+        INSERT INTO approvals_log (task_id, task_name, original_author, original_author_email, approved_at)
         VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(task_id) DO UPDATE SET
+          task_name=excluded.task_name,
+          original_author=CASE
+            WHEN excluded.original_author != '' THEN excluded.original_author
+            ELSE approvals_log.original_author
+          END,
+          original_author_email=CASE
+            WHEN excluded.original_author_email != '' THEN excluded.original_author_email
+            ELSE approvals_log.original_author_email
+          END,
+          approved_at=CASE
+            WHEN excluded.approved_at != '' THEN excluded.approved_at
+            ELSE approvals_log.approved_at
+          END
         """,
         (task_id, task_name, original_author, original_author_email, approved_at),
     )
-
-
-def load_approved_task_ids(conn):
-    cur = conn.execute("SELECT task_id FROM approvals_log")
-    return {row[0] for row in cur.fetchall()}
 
 
 def normalize_name(name: str) -> str:
@@ -237,8 +253,6 @@ def main():
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     conn = init_db()
     state = load_task_state(conn)
-    approved_ids = load_approved_task_ids(conn)
-
     columns = [
         "task_name",
         "status_name",  # from task_status_defn.status_name
@@ -284,21 +298,19 @@ def main():
             )
 
         if task_id and status_name == "Approved":
-            if task_id not in approved_ids:
-                approval_author = resolve_owner_name(t)
-                approval_email = users_email_by_name.get(
-                    normalize_name(approval_author), ""
-                )
-                approved_at = t.get("updated_at") or ts
-                append_approval_log(
-                    conn,
-                    task_id,
-                    t.get("task_name"),
-                    approval_author,
-                    approval_email,
-                    approved_at,
-                )
-                approved_ids.add(task_id)
+            approval_author = resolve_owner_name(t)
+            approval_email = users_email_by_name.get(
+                normalize_name(approval_author), ""
+            )
+            approved_at = t.get("approved_at") or t.get("updated_at") or ts
+            append_approval_log(
+                conn,
+                task_id,
+                t.get("task_name"),
+                approval_author,
+                approval_email,
+                approved_at,
+            )
 
         owned_by_name = resolve_owner_name(t)
         owned_by_email = users_email_by_name.get(normalize_name(owned_by_name), "")
