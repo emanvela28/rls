@@ -346,12 +346,13 @@ def main():
                 approved_ids.add(task_id)
 
         display_author = original_author
-        if not display_author and status_name == "Awaiting Review":
-            display_author = t.get("updated_by_user_name")
         if task_id in query_authors:
             display_author = query_authors[task_id]["original_author_name"]
         elif task_id in claimable_authors:
             display_author = claimable_authors[task_id]["original_author_name"]
+        elif status_name in ("Awaiting Review", "In Review", "Approved"):
+            if t.get("updated_by_user_name"):
+                display_author = t.get("updated_by_user_name")
         display_author_email = users_email_by_name.get(
             normalize_name(display_author), ""
         )
