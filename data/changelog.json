@@ -1,5 +1,124 @@
 [
   {
+    "task_name": "Cholelithiasis_CT_Abdomen_1508",
+    "original_author": "Dr. Shah",
+    "original_author_email": "pf4425cf2100bf8d@c-mercor.com",
+    "approved_at": "2026-01-21T23:32:48.056773Z",
+    "task_id": "task_2dc1a21d265f49d886a8238e7fc53ff3"
+  },
+  {
+    "task_name": "Aortic-aneurysm_CT_Abdomen_634",
+    "original_author": "HAMILTON ADRIAN",
+    "original_author_email": "g748044d6fa8c271@c-mercor.com",
+    "approved_at": "2026-01-21T23:03:20.413078Z",
+    "task_id": "task_07852f31f73e4e3a903d0d65fe63abc3"
+  },
+  {
+    "task_name": "Pericardial-effusion_CT_Chest_008",
+    "original_author": "Adam Wilner",
+    "original_author_email": "ib81d1580a688dc7@c-mercor.com",
+    "approved_at": "2026-01-21T22:37:02.520721Z",
+    "task_id": "task_107499054f824a64b0938d9f3e07a6a4"
+  },
+  {
+    "task_name": "Fatty-liver_CT_Others_1181",
+    "original_author": "Joseph Mazzie",
+    "original_author_email": "medical50@c-mercor.com",
+    "approved_at": "2026-01-21T22:30:48.446560Z",
+    "task_id": "task_0b182d6834134b2fa21517f843292f40"
+  },
+  {
+    "task_name": "Disc-protrusion_MR_Lumbar-Spine_428",
+    "original_author": "Chin Seung",
+    "original_author_email": "o03fb28856d33a72@c-mercor.com",
+    "approved_at": "2026-01-21T22:14:03.295023Z",
+    "task_id": "task_01b514c1d894481ca411595bb3b43b6b"
+  },
+  {
+    "task_name": "Emphysema_CT_Chest_729",
+    "original_author": "Gita Borthakur",
+    "original_author_email": "c2fbbe1db3ec6121@c-mercor.com",
+    "approved_at": "2026-01-21T22:10:04.764991Z",
+    "task_id": "task_0ef4d6d9497b4d379ab90620546eb68e"
+  },
+  {
+    "task_name": "Aortic-aneurysm_CT_Chest_597",
+    "original_author": "Kenny Winkler",
+    "original_author_email": "medical85@c-mercor.com",
+    "approved_at": "2026-01-21T22:09:41.293941Z",
+    "task_id": "task_075a9a3094c640098932df5c3e4f2a3f"
+  },
+  {
+    "task_name": "Renal-cyst_CT_Abdomen_1541",
+    "original_author": "Ronald Bailey",
+    "original_author_email": "l150c05edd783f88@c-mercor.com",
+    "approved_at": "2026-01-21T22:07:28.658118Z",
+    "task_id": "task_0007e489fa114727b0b79ca7a25ea7ef"
+  },
+  {
+    "task_name": "Cirrhosis_CT_Others_173",
+    "original_author": "M B",
+    "original_author_email": "medical61@c-mercor.com",
+    "approved_at": "2026-01-21T21:41:37.213816Z",
+    "task_id": "task_01bd1430b3eb4ec38c72afdd17eb83df"
+  },
+  {
+    "task_name": "Pericardial-effusion_CT_Others_021",
+    "original_author": "Jeffrey Ross",
+    "original_author_email": "nd64ef2ca0b43af5@c-mercor.com",
+    "approved_at": "2026-01-21T21:32:59.307166Z",
+    "task_id": "task_0c4f9538462040008d67c65a914e7934"
+  },
+  {
+    "task_name": "Uterine-fibroids_CT_Abdomen_1245",
+    "original_author": "M B",
+    "original_author_email": "medical61@c-mercor.com",
+    "approved_at": "2026-01-21T21:29:44.634885Z",
+    "task_id": "task_03fec9e116c44a8594fdb8e691ac24b9"
+  },
+  {
+    "task_name": "Emphysema_CT_Thyroid_697",
+    "original_author": "M B",
+    "original_author_email": "medical61@c-mercor.com",
+    "approved_at": "2026-01-21T21:16:18.403673Z",
+    "task_id": "task_005bfca7371a466c9b63798b4f48ccbe"
+  },
+  {
+    "task_name": "Cardiomegaly_CT_Abdomen-pelvis_1629",
+    "original_author": "Jeffrey Ross",
+    "original_author_email": "nd64ef2ca0b43af5@c-mercor.com",
+    "approved_at": "2026-01-21T21:01:13.172101Z",
+    "task_id": "task_00b993bd24f84d368124bb7da81cd4a4"
+  },
+  {
+    "task_name": "Renal-cyst_CT_Abdomen-pelvis_593",
+    "original_author": "Jeffrey Ross",
+    "original_author_email": "nd64ef2ca0b43af5@c-mercor.com",
+    "approved_at": "2026-01-21T20:22:19.973307Z",
+    "task_id": "task_01ab7565c44f41839105c53a59472b0c"
+  },
+  {
+    "task_name": "Emphysema_CT_Chest_689",
+    "original_author": "Gita Borthakur",
+    "original_author_email": "c2fbbe1db3ec6121@c-mercor.com",
+    "approved_at": "2026-01-21T19:57:20.762568Z",
+    "task_id": "task_07ab8fcae4224f2c9dc8fbac8da72cb1"
+  },
+  {
+    "task_name": "Bronchiectasis_CT_Abdomen_858",
+    "original_author": "Jeffrey Ross",
+    "original_author_email": "nd64ef2ca0b43af5@c-mercor.com",
+    "approved_at": "2026-01-21T16:39:49.206385Z",
+    "task_id": "task_01d3943bcc534956929a1664f9e94052"
+  },
+  {
+    "task_name": "Chronic-infarct_CT_Brain/Head_528",
+    "original_author": "William Greenberg",
+    "original_author_email": "oeaac1502418b464@c-mercor.com",
+    "approved_at": "2026-01-21T16:37:11.514524Z",
+    "task_id": "task_ae300ffbcb2e410d96ebe7ab4d175102"
+  },
+  {
     "task_name": "Uterine-fibroids_MR_Others_1303",
     "original_author": "Colin McCarthy",
     "original_author_email": "medical60@c-mercor.com",

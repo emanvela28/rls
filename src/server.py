@@ -2,6 +2,7 @@ import json
 import os
 import threading
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
@@ -152,6 +153,12 @@ def start_background_scrape():
     threading.Thread(target=scrape_loop, daemon=True).start()
 
 
+def format_ts(epoch_seconds: float) -> str:
+    if not epoch_seconds:
+        return ""
+    return datetime.fromtimestamp(epoch_seconds, tz=timezone.utc).isoformat()
+
+
 @app.get("/")
 def index():
     return FileResponse(PUBLIC_DIR / "index.html")
@@ -210,3 +217,29 @@ def api_changelog_csv(payload=Depends(verify_token)):
     if not data_file.exists():
         raise HTTPException(status_code=503, detail="changelog.csv not available yet.")
     return FileResponse(data_file)
+
+
+@app.get("/api/scrape-status")
+def api_scrape_status(payload=Depends(verify_token)):
+    data_file = DATA_DIR / "data.json"
+    changelog_file = DATA_DIR / "changelog.json"
+    status = {
+        "running": SCRAPE_STATE["running"],
+        "last_run": SCRAPE_STATE["last_run"],
+        "last_run_iso": format_ts(SCRAPE_STATE["last_run"]),
+        "last_error": SCRAPE_STATE["last_error"],
+        "data_exists": data_file.exists(),
+        "changelog_exists": changelog_file.exists(),
+        "data_mtime": data_file.stat().st_mtime if data_file.exists() else 0.0,
+        "data_mtime_iso": format_ts(
+            data_file.stat().st_mtime if data_file.exists() else 0.0
+        ),
+        "data_generated_at": "",
+    }
+    if data_file.exists():
+        try:
+            payload = json.loads(data_file.read_text(encoding="utf-8"))
+            status["data_generated_at"] = payload.get("generated_at", "")
+        except Exception as exc:
+            status["data_generated_at"] = f"error: {exc}"
+    return status
