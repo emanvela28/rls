@@ -350,9 +350,8 @@ def main():
             display_author = query_authors[task_id]["original_author_name"]
         elif task_id in claimable_authors:
             display_author = claimable_authors[task_id]["original_author_name"]
-        elif status_name in ("Awaiting Review", "In Review", "Approved"):
-            if t.get("updated_by_user_name"):
-                display_author = t.get("updated_by_user_name")
+        elif t.get("owned_by_user_name"):
+            display_author = t.get("owned_by_user_name")
         display_author_email = users_email_by_name.get(
             normalize_name(display_author), ""
         )
