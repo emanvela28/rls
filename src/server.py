@@ -1,5 +1,6 @@
 import json
 import os
+import threading
 import time
 from pathlib import Path
 
@@ -21,6 +22,9 @@ ALLOWED_EMAIL_DOMAINS = [
     if d.strip()
 ]
 JWKS_CACHE = {"expires_at": 0, "keys": []}
+SCRAPE_INTERVAL_SECONDS = 180
+SCRAPE_STATE = {"running": False, "last_run": 0.0, "last_error": ""}
+SCRAPE_LOCK = threading.Lock()
 
 
 def get_jwks():
@@ -95,6 +99,58 @@ def verify_token(
 app = FastAPI()
 app.mount("/static", StaticFiles(directory=PUBLIC_DIR), name="static")
 
+def run_scrape_once():
+    with SCRAPE_LOCK:
+        if SCRAPE_STATE["running"]:
+            return False
+        SCRAPE_STATE["running"] = True
+    try:
+        from scrape import main as scrape_main
+
+        scrape_main()
+        SCRAPE_STATE["last_error"] = ""
+        return True
+    except Exception as exc:
+        SCRAPE_STATE["last_error"] = str(exc)
+        return False
+    finally:
+        SCRAPE_STATE["last_run"] = time.time()
+        with SCRAPE_LOCK:
+            SCRAPE_STATE["running"] = False
+
+
+def start_scrape_thread():
+    thread = threading.Thread(target=run_scrape_once, daemon=True)
+    thread.start()
+    return thread
+
+
+def ensure_scrape_fresh(blocking: bool = False):
+    data_file = DATA_DIR / "data.json"
+    if not data_file.exists():
+        if blocking:
+            run_scrape_once()
+        else:
+            start_scrape_thread()
+        return
+    age = time.time() - data_file.stat().st_mtime
+    if age >= SCRAPE_INTERVAL_SECONDS:
+        if blocking:
+            run_scrape_once()
+        else:
+            start_scrape_thread()
+
+
+def scrape_loop():
+    while True:
+        run_scrape_once()
+        time.sleep(SCRAPE_INTERVAL_SECONDS)
+
+
+@app.on_event("startup")
+def start_background_scrape():
+    threading.Thread(target=scrape_loop, daemon=True).start()
+
 
 @app.get("/")
 def index():
@@ -125,23 +181,32 @@ def config_js():
 
 @app.get("/api/data")
 def api_data(payload=Depends(verify_token)):
+    ensure_scrape_fresh(blocking=False)
     data_file = DATA_DIR / "data.json"
     if not data_file.exists():
-        raise HTTPException(status_code=404, detail="data.json not found.")
+        ensure_scrape_fresh(blocking=True)
+    if not data_file.exists():
+        raise HTTPException(status_code=503, detail="data.json not available yet.")
     return json.loads(data_file.read_text(encoding="utf-8"))
 
 
 @app.get("/api/changelog")
 def api_changelog(payload=Depends(verify_token)):
+    ensure_scrape_fresh(blocking=False)
     data_file = DATA_DIR / "changelog.json"
     if not data_file.exists():
-        raise HTTPException(status_code=404, detail="changelog.json not found.")
+        ensure_scrape_fresh(blocking=True)
+    if not data_file.exists():
+        raise HTTPException(status_code=503, detail="changelog.json not available yet.")
     return json.loads(data_file.read_text(encoding="utf-8"))
 
 
 @app.get("/api/changelog.csv")
 def api_changelog_csv(payload=Depends(verify_token)):
+    ensure_scrape_fresh(blocking=False)
     data_file = DATA_DIR / "changelog.csv"
     if not data_file.exists():
-        raise HTTPException(status_code=404, detail="changelog.csv not found.")
+        ensure_scrape_fresh(blocking=True)
+    if not data_file.exists():
+        raise HTTPException(status_code=503, detail="changelog.csv not available yet.")
     return FileResponse(data_file)
