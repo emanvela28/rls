@@ -430,7 +430,7 @@ def main():
                 None,
             )
 
-        if task_id and status_name == "Approved":
+        if task_id and status_name in {"Approved", "QA Awaiting Review"}:
             approval_author = resolve_owner_name(t)
             approval_email = users_email_by_name.get(
                 normalize_name(approval_author), ""
