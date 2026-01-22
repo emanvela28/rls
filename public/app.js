@@ -11,12 +11,14 @@ const prevPageBtn = document.getElementById("prevPage");
 const nextPageBtn = document.getElementById("nextPage");
 const pageInfoEl = document.getElementById("pageInfo");
 const headers = document.querySelectorAll("thead th[data-key]");
+const exportCsvBtn = document.getElementById("exportCsv");
 
 let allTasks = [];
 let sortKey = "updated_at";
 let sortDirection = "desc";
 let currentPage = 1;
 let pageSize = Number(pageSizeSelect.value);
+let lastFilteredSorted = [];
 
 const formatDate = (value) => {
   if (!value) return "—";
@@ -157,6 +159,7 @@ const applyFilters = () => {
   });
 
   const sorted = getSortedTasks(filtered);
+  lastFilteredSorted = sorted;
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
   currentPage = Math.min(currentPage, totalPages);
   const start = (currentPage - 1) * pageSize;
@@ -223,6 +226,42 @@ headers.forEach((header) => {
     applyFilters();
   });
 });
+
+const escapeCsv = (value) => {
+  if (value == null) return "";
+  const text = String(value);
+  if (/[",\n]/.test(text)) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+  return text;
+};
+
+const exportFilteredCsv = () => {
+  const rows = [
+    ["task_name", "author_name", "author_email", "status_name", "task_id"],
+    ...lastFilteredSorted.map((task) => [
+      task.task_name || "",
+      task.owned_by_user_name || "",
+      task.owned_by_user_email || "",
+      task.status_name || "",
+      task.task_id || "",
+    ]),
+  ];
+  const csv = rows.map((row) => row.map(escapeCsv).join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "tasks-filtered.csv";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+};
+
+if (exportCsvBtn) {
+  exportCsvBtn.addEventListener("click", exportFilteredCsv);
+}
 
 const logoutBtn = document.getElementById("logoutBtn");
 if (logoutBtn) {
