@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import threading
 import time
 from datetime import datetime, timezone
@@ -14,6 +15,9 @@ from jose import jwt
 BASE_DIR = Path(__file__).resolve().parent.parent
 PUBLIC_DIR = BASE_DIR / "public"
 DATA_DIR = BASE_DIR / "data"
+SRC_DIR = BASE_DIR / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "").strip()
