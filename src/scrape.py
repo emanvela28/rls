@@ -4,7 +4,9 @@ warnings.filterwarnings("ignore", message="urllib3 v2 only supports OpenSSL")
 import os
 import csv
 import json
+import base64
 import sqlite3
+import sys
 from datetime import datetime, timezone
 
 import requests
@@ -19,6 +21,7 @@ OUT_CHANGELOG_CSV = "data/changelog.csv"
 DB_FILE = "data/tasks.db"
 USERS_URL_TEMPLATE = "https://api.studio.mercor.com/users/campaign/{campaign_id}"
 AUTHOR_CUSTOM_FIELD_ID = "field_f149502069bd4fde84cc33a35373fd83"
+SHEET_SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 
 def load_api_key() -> str:
@@ -128,6 +131,11 @@ def append_approval_log(
     )
 
 
+def load_approved_task_ids(conn):
+    cur = conn.execute("SELECT task_id FROM approvals_log")
+    return {row[0] for row in cur.fetchall()}
+
+
 def normalize_name(name: str) -> str:
     if not name:
         return ""
@@ -144,6 +152,45 @@ def resolve_owner_name(task: dict) -> str:
         if isinstance(custom_owner, str) and custom_owner.strip():
             return custom_owner.strip()
     return ""
+
+
+def load_sheet_config():
+    load_dotenv(override=True)
+    sheet_id = os.getenv("GOOGLE_SHEETS_ID", "").strip()
+    sheet_tab = os.getenv("GOOGLE_SHEETS_TAB", "").strip() or "Append"
+    creds_raw = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", "").strip()
+    return sheet_id, sheet_tab, creds_raw
+
+
+def parse_service_account_info(raw: str):
+    if not raw:
+        return None
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        try:
+            decoded = base64.b64decode(raw).decode("utf-8")
+            return json.loads(decoded)
+        except Exception:
+            return None
+
+
+def append_sheet_rows(rows, sheet_id, sheet_tab, creds_info):
+    if not rows or not sheet_id or not creds_info:
+        return
+    try:
+        import gspread
+        from google.oauth2.service_account import Credentials
+
+        creds = Credentials.from_service_account_info(
+            creds_info,
+            scopes=SHEET_SCOPES,
+        )
+        client = gspread.authorize(creds)
+        worksheet = client.open_by_key(sheet_id).worksheet(sheet_tab)
+        worksheet.append_rows(rows, value_input_option="RAW")
+    except Exception as exc:
+        print(f"Warning: failed to append to Google Sheet: {exc}", file=sys.stderr)
 
 
 def load_campaign_users(headers, campaign_id):
@@ -253,6 +300,14 @@ def main():
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     conn = init_db()
     state = load_task_state(conn)
+    approved_ids = load_approved_task_ids(conn)
+    sheet_id, sheet_tab, creds_raw = load_sheet_config()
+    creds_info = parse_service_account_info(creds_raw)
+    if sheet_id and not creds_info:
+        print(
+            "Warning: GOOGLE_SERVICE_ACCOUNT_JSON is missing or invalid; skipping sheet append.",
+            file=sys.stderr,
+        )
     columns = [
         "task_name",
         "status_name",  # from task_status_defn.status_name
@@ -279,6 +334,7 @@ def main():
 
     json_tasks = []
     approval_rows = []
+    new_sheet_rows = []
     for t in tasks:
         status_name = ""
         status_defn = t.get("task_status_defn") or {}
@@ -311,6 +367,17 @@ def main():
                 approval_email,
                 approved_at,
             )
+            if task_id not in approved_ids:
+                new_sheet_rows.append(
+                    [
+                        t.get("task_name") or "",
+                        approval_author,
+                        approval_email,
+                        approved_at,
+                        task_id,
+                    ]
+                )
+                approved_ids.add(task_id)
 
         owned_by_name = resolve_owner_name(t)
         owned_by_email = users_email_by_name.get(normalize_name(owned_by_name), "")
@@ -348,6 +415,7 @@ def main():
         )
 
     lines.extend(table_rows(rows))
+    append_sheet_rows(new_sheet_rows, sheet_id, sheet_tab, creds_info)
 
     with open(OUT_FILE, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
