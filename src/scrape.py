@@ -18,6 +18,7 @@ OUT_JSON = "data/data.json"
 OUT_CSV = "data/data.csv"
 OUT_CHANGELOG_JSON = "data/changelog.json"
 OUT_CHANGELOG_CSV = "data/changelog.csv"
+OUT_SHEET_STATUS = "data/sheet_status.json"
 DB_FILE = "data/tasks.db"
 USERS_URL_TEMPLATE = "https://api.studio.mercor.com/users/campaign/{campaign_id}"
 AUTHOR_CUSTOM_FIELD_ID = "field_f149502069bd4fde84cc33a35373fd83"
@@ -180,9 +181,24 @@ def parse_service_account_info(raw: str):
             return None
 
 
+def write_sheet_status(payload: dict):
+    try:
+        with open(OUT_SHEET_STATUS, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2)
+    except Exception:
+        pass
+
+
 def append_sheet_rows(rows, sheet_id, sheet_tab, creds_info):
     if not rows or not sheet_id or not creds_info:
-        return
+        write_sheet_status(
+            {
+                "last_append_at": "",
+                "last_append_count": 0,
+                "last_error": "Missing sheet config or rows.",
+            }
+        )
+        return False
     try:
         import gspread
         from google.oauth2.service_account import Credentials
@@ -194,8 +210,25 @@ def append_sheet_rows(rows, sheet_id, sheet_tab, creds_info):
         client = gspread.authorize(creds)
         worksheet = client.open_by_key(sheet_id).worksheet(sheet_tab)
         worksheet.append_rows(rows, value_input_option="RAW")
+        write_sheet_status(
+            {
+                "last_append_at": datetime.now(timezone.utc).isoformat(),
+                "last_append_count": len(rows),
+                "last_error": "",
+            }
+        )
+        return True
     except Exception as exc:
-        print(f"Warning: failed to append to Google Sheet: {exc}", file=sys.stderr)
+        err = f"{type(exc).__name__}: {exc}"
+        print(f"Warning: failed to append to Google Sheet: {err}", file=sys.stderr)
+        write_sheet_status(
+            {
+                "last_append_at": "",
+                "last_append_count": 0,
+                "last_error": err,
+            }
+        )
+        return False
 
 
 def load_campaign_users(headers, campaign_id):
