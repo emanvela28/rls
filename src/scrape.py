@@ -190,7 +190,9 @@ def write_sheet_status(payload: dict):
         pass
 
 
-def append_sheet_rows(rows, sheet_id, sheet_tab, creds_info, replace: bool = False):
+def append_sheet_rows(
+    rows, sheet_id, sheet_tab, creds_info, replace: bool = False, dedupe: bool = True
+):
     if not rows or not sheet_id or not creds_info:
         write_sheet_status(
             {
@@ -214,7 +216,23 @@ def append_sheet_rows(rows, sheet_id, sheet_tab, creds_info, replace: bool = Fal
             worksheet.clear()
             worksheet.append_rows(rows, value_input_option="RAW")
         else:
-            worksheet.append_rows(rows, value_input_option="RAW")
+            if dedupe:
+                existing = worksheet.get_all_values()
+                task_id_idx = -1
+                if existing:
+                    header = existing[0]
+                    if "task_id" in header:
+                        task_id_idx = header.index("task_id")
+                if task_id_idx == -1:
+                    task_id_idx = len(existing[0]) - 1 if existing else -1
+                existing_ids = set()
+                if task_id_idx >= 0:
+                    for row in existing[1:]:
+                        if len(row) > task_id_idx:
+                            existing_ids.add(row[task_id_idx].strip())
+                rows = [row for row in rows if row[-1] not in existing_ids]
+            if rows:
+                worksheet.append_rows(rows, value_input_option="RAW")
         write_sheet_status(
             {
                 "last_append_at": datetime.now(timezone.utc).isoformat(),
