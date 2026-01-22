@@ -20,6 +20,7 @@ OUT_CHANGELOG_JSON = "data/changelog.json"
 OUT_CHANGELOG_CSV = "data/changelog.csv"
 OUT_SHEET_STATUS = "data/sheet_status.json"
 DB_FILE = "data/tasks.db"
+EMAILS_CSV = "data/emails.csv"
 USERS_URL_TEMPLATE = "https://api.studio.mercor.com/users/campaign/{campaign_id}"
 AUTHOR_CUSTOM_FIELD_ID = "field_f149502069bd4fde84cc33a35373fd83"
 SHEET_SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
@@ -189,7 +190,7 @@ def write_sheet_status(payload: dict):
         pass
 
 
-def append_sheet_rows(rows, sheet_id, sheet_tab, creds_info):
+def append_sheet_rows(rows, sheet_id, sheet_tab, creds_info, replace: bool = False):
     if not rows or not sheet_id or not creds_info:
         write_sheet_status(
             {
@@ -209,7 +210,11 @@ def append_sheet_rows(rows, sheet_id, sheet_tab, creds_info):
         )
         client = gspread.authorize(creds)
         worksheet = client.open_by_key(sheet_id).worksheet(sheet_tab)
-        worksheet.append_rows(rows, value_input_option="RAW")
+        if replace:
+            worksheet.clear()
+            worksheet.append_rows(rows, value_input_option="RAW")
+        else:
+            worksheet.append_rows(rows, value_input_option="RAW")
         write_sheet_status(
             {
                 "last_append_at": datetime.now(timezone.utc).isoformat(),
@@ -229,6 +234,21 @@ def append_sheet_rows(rows, sheet_id, sheet_tab, creds_info):
             }
         )
         return False
+
+
+def load_contractor_email_map(path: str) -> dict:
+    mapping = {}
+    try:
+        with open(path, newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                contractor_email = (row.get("Contractor Email") or "").strip().lower()
+                personal_email = (row.get("Email") or "").strip()
+                if contractor_email and personal_email:
+                    mapping[contractor_email] = personal_email
+    except FileNotFoundError:
+        pass
+    return mapping
 
 
 def load_campaign_users(headers, campaign_id):
@@ -341,6 +361,7 @@ def main():
     approved_ids = load_approved_task_ids(conn)
     sheet_id, sheet_tab, creds_raw, backfill = load_sheet_config()
     creds_info = parse_service_account_info(creds_raw)
+    contractor_email_map = load_contractor_email_map(EMAILS_CSV)
     if sheet_id and not creds_info:
         print(
             "Warning: GOOGLE_SERVICE_ACCOUNT_JSON is missing or invalid; skipping sheet append.",
@@ -406,11 +427,16 @@ def main():
                 approved_at,
             )
             if backfill or task_id not in approved_ids:
+                sheet_email = approval_email
+                if approval_email:
+                    sheet_email = contractor_email_map.get(
+                        approval_email.lower(), approval_email
+                    )
                 new_sheet_rows.append(
                     [
                         t.get("task_name") or "",
                         approval_author,
-                        approval_email,
+                        sheet_email,
                         approved_at,
                         task_id,
                     ]
@@ -453,7 +479,14 @@ def main():
         )
 
     lines.extend(table_rows(rows))
-    append_sheet_rows(new_sheet_rows, sheet_id, sheet_tab, creds_info)
+    if new_sheet_rows:
+        sheet_rows = new_sheet_rows
+        replace = False
+        if backfill:
+            header = ["task_name", "author_name", "author_email", "approved_at", "task_id"]
+            sheet_rows = [header, *new_sheet_rows]
+            replace = True
+        append_sheet_rows(sheet_rows, sheet_id, sheet_tab, creds_info, replace=replace)
 
     with open(OUT_FILE, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
