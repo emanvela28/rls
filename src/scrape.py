@@ -159,7 +159,12 @@ def load_sheet_config():
     sheet_id = os.getenv("GOOGLE_SHEETS_ID", "").strip()
     sheet_tab = os.getenv("GOOGLE_SHEETS_TAB", "").strip() or "Append"
     creds_raw = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON", "").strip()
-    return sheet_id, sheet_tab, creds_raw
+    backfill = os.getenv("GOOGLE_SHEETS_BACKFILL", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+    return sheet_id, sheet_tab, creds_raw, backfill
 
 
 def parse_service_account_info(raw: str):
@@ -301,7 +306,7 @@ def main():
     conn = init_db()
     state = load_task_state(conn)
     approved_ids = load_approved_task_ids(conn)
-    sheet_id, sheet_tab, creds_raw = load_sheet_config()
+    sheet_id, sheet_tab, creds_raw, backfill = load_sheet_config()
     creds_info = parse_service_account_info(creds_raw)
     if sheet_id and not creds_info:
         print(
@@ -367,7 +372,7 @@ def main():
                 approval_email,
                 approved_at,
             )
-            if task_id not in approved_ids:
+            if backfill or task_id not in approved_ids:
                 new_sheet_rows.append(
                     [
                         t.get("task_name") or "",
