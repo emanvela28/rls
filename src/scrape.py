@@ -287,6 +287,16 @@ def load_campaign_users(headers, campaign_id):
     return email_by_name
 
 
+def apply_email_overrides(email_by_name: dict) -> dict:
+    # Manual fixes for names that do not match the campaign users list
+    overrides = {
+        "wooil kim": "d1f02345a5a0400d@c-mercor.com",
+        "erich mussak": "medical61@c-mercor.com",
+    }
+    email_by_name.update(overrides)
+    return email_by_name
+
+
 def tsv_row(values):
     cleaned = []
     for v in values:
@@ -349,6 +359,7 @@ def main():
     headers["Authorization"] = f"Bearer {api_key}"
 
     users_email_by_name = load_campaign_users(headers, campaign_id)
+    users_email_by_name = apply_email_overrides(users_email_by_name)
     r = requests.get(URL, headers=headers, timeout=60)
 
     # If 401, print the server message (e.g. "Token has expired") and exit
