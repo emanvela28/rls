@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Funnel Tracking</title>
+    <link rel="icon" href="/static/mercor.ico" />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/config.js"></script>
+  </head>
+  <body>
+    <div class="bg-orb bg-orb--one" aria-hidden="true"></div>
+    <div class="bg-orb bg-orb--two" aria-hidden="true"></div>
+    <main class="page">
+      <header class="hero">
+        <p class="eyebrow">Funnel View</p>
+        <h1>Funnel Tracking</h1>
+        <p class="subtitle">
+          See who has claimed, submitted, and been approved—starting from the top of the funnel.
+        </p>
+        <div class="meta">
+          <span id="generatedAt">Updated: —</span>
+          <span id="writerTotal">Writers counted: —</span>
+        </div>
+        <div class="hero-actions funnel-actions">
+          <a class="btn-ghost" href="/">Back to Tasks</a>
+          <a class="btn-ghost" href="/authors">Authors</a>
+          <button class="btn-ghost" id="logoutBtn" type="button">Logout</button>
+        </div>
+      </header>
+
+      <section class="panel">
+        <div class="status-block">
+          <div class="status-block__label">Statuses counted</div>
+          <div class="status-badges">
+            <span class="status-badge status-badge--approved">Approved</span>
+            <span class="status-badge status-badge--approved">QA Awaiting Review</span>
+            <span class="status-badge status-badge--submitted">Awaiting Review</span>
+            <span class="status-badge status-badge--submitted">In Review</span>
+            <span class="status-badge status-badge--claimed">Pending</span>
+          </div>
+        </div>
+        <div class="stats" id="funnelStats"></div>
+        <div class="stats" id="stagePeopleStats"></div>
+      </section>
+
+      <section class="panel">
+        <div class="table-header">
+          <h2>Funnel Cohorts</h2>
+          <span id="cohortCounts">— authors</span>
+        </div>
+        <div class="funnel-columns" id="funnelColumns"></div>
+      </section>
+
+      <section class="panel" id="authorDetail" hidden>
+        <div class="table-header">
+          <div>
+            <p class="eyebrow" id="detailEmail">Email</p>
+            <h2 id="detailName">Author</h2>
+          </div>
+          <span id="detailCount">— tasks</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Task</th>
+                <th>ID</th>
+              </tr>
+            </thead>
+            <tbody id="detailTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="table-panel table-panel--progress">
+        <div class="table-header table-header--progress">
+          <div>
+            <h2>Author Progress</h2>
+            <div class="table-subtitle">Click a stage pill to filter.</div>
+          </div>
+          <div class="table-header-actions">
+            <div class="chips" id="stageFilterChips"></div>
+            <label class="pill-select">
+              <span>Sort</span>
+              <select id="progressSort">
+                <option value="stage-desc">Stage (Approved → Claimed)</option>
+                <option value="stage-asc">Stage (Claimed → Approved)</option>
+                <option value="name-asc">Name (A → Z)</option>
+                <option value="name-desc">Name (Z → A)</option>
+                <option value="approved-desc">Approved (high → low)</option>
+                <option value="approved-asc">Approved (low → high)</option>
+                <option value="submitted-desc">Submitted (high → low)</option>
+                <option value="claimed-desc">Claimed (high → low)</option>
+              </select>
+            </label>
+            <span id="authorProgressCount">— authors</span>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Author</th>
+                <th>Email</th>
+                <th>Highest Stage</th>
+                <th>Approved</th>
+                <th>Submitted</th>
+                <th>Claimed</th>
+              </tr>
+            </thead>
+            <tbody id="progressTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/static/auth.js"></script>
+    <script src="/static/funnel.js"></script>
+  </body>
+</html>

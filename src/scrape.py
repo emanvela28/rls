@@ -8,19 +8,23 @@ import base64
 import sqlite3
 import sys
 from datetime import datetime, timezone
+from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
 
 URL = "https://api.studio.mercor.com/tasks/world/world_2cb0dbfca8494125bc1b71f0f3472a76/detailed"
-OUT_FILE = "data/data.txt"
-OUT_JSON = "data/data.json"
-OUT_CSV = "data/data.csv"
-OUT_CHANGELOG_JSON = "data/changelog.json"
-OUT_CHANGELOG_CSV = "data/changelog.csv"
-OUT_SHEET_STATUS = "data/sheet_status.json"
-DB_FILE = "data/tasks.db"
-EMAILS_CSV = "data/emails.csv"
+BASE_DIR = Path(__file__).resolve().parent.parent
+# Ensure relative paths below always resolve from repo root, regardless of cwd
+os.chdir(BASE_DIR)
+OUT_FILE = Path("data/data.txt")
+OUT_JSON = Path("data/data.json")
+OUT_CSV = Path("data/data.csv")
+OUT_CHANGELOG_JSON = Path("data/changelog.json")
+OUT_CHANGELOG_CSV = Path("data/changelog.csv")
+OUT_SHEET_STATUS = Path("data/sheet_status.json")
+DB_FILE = Path("data/tasks.db")
+EMAILS_CSV = Path("data/emails.csv")
 USERS_URL_TEMPLATE = "https://api.studio.mercor.com/users/campaign/{campaign_id}"
 AUTHOR_CUSTOM_FIELD_ID = "field_f149502069bd4fde84cc33a35373fd83"
 SHEET_SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
@@ -45,7 +49,7 @@ def load_company_id() -> str:
 
 
 def init_db():
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(str(DB_FILE))
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS task_state (

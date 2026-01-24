@@ -178,6 +178,11 @@ def authors():
     return FileResponse(PUBLIC_DIR / "authors.html")
 
 
+@app.get("/funnel")
+def funnel():
+    return FileResponse(PUBLIC_DIR / "funnel.html")
+
+
 @app.get("/config.js")
 def config_js():
     content = (
