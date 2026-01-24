@@ -1,4 +1,20 @@
 task_name,original_author,original_author_email,approved_at,task_id
+Aortic-aneurysm_CT_Abdomen-pelvis_642,Muhammad Hossain,ob65449bcf28bea1@c-mercor.com,2026-01-24T21:06:51.924075Z,task_088b12056cec43c5a4c72eb3be6e560f
+Cirrhosis_CT_Others_1417,Chin Seung,o03fb28856d33a72@c-mercor.com,2026-01-24T20:53:35.820138Z,task_1bd97a3f5ab542588244eb4345f6bcaa
+Emphysema_CT_Chest_759,Adam Wilner,ib81d1580a688dc7@c-mercor.com,2026-01-24T20:52:01.689585Z,task_10efea92b17347569737f3cb77b0e118
+Chronic-infarct_MR_Others_443,Keith McCollister,m62c40825589f29c@c-mercor.com,2026-01-24T20:12:03.460629Z,task_1337dfebc5ad4daca9fe763e7f0ab3ea
+Iliac-artery-aneurysm_CT_Abdomen_1422,Jaron Tepper,p406de89e24a772d@c-mercor.com,2026-01-24T20:02:56.947369Z,task_182460aead6c40eb828dff5f9b8a0203
+Bronchiectasis_CT_Chest_805,contractor d1f023,,2026-01-24T20:01:53.367375Z,task_0e0c744048a74646bc53b61f41faf822
+Ascites_CT_Chest_114,Brian D'Amore,p92f5194510e036b@c-mercor.com,2026-01-24T19:22:13.007431Z,task_1f8029dc71b94c8699ba24d564dc8d21
+Bronchiectasis_CT_Chest_780,Anthony Powell,a8ea247eac7c01eb@c-mercor.com,2026-01-24T19:11:28.253659Z,task_1ade5ad99dff4b78b96e448bc88f7454
+Iliac-artery-aneurysm_CT_Abdomen-pelvis_558,Ronald Gathagan,icb635be60491d97@c-mercor.com,2026-01-24T19:00:29.448630Z,task_1f13ad4f3e9148139f1c8ad0cfc478ef
+Aortic-aneurysm_CT_Chest_644,Ronald Gathagan,icb635be60491d97@c-mercor.com,2026-01-24T18:45:32.415905Z,task_14c26f4b5580489cb2a2582ef7196487
+Cirrhosis_CT_Abdomen_1386,Brian D'Amore,p92f5194510e036b@c-mercor.com,2026-01-24T18:30:07.154926Z,task_1d8767441a9d49ef989a6fb7977fb5b8
+Chronic-infarct_CT_Brain/Head_471,Adam Wilner,ib81d1580a688dc7@c-mercor.com,2026-01-24T18:12:47.170803Z,task_6d6e21113f2e4a6292dfbc8628ee9206
+Chronic-infarct_CT_Brain/Head_452,Adam Wilner,ib81d1580a688dc7@c-mercor.com,2026-01-24T17:52:42.138805Z,task_43b44fc451084aa1883f8824b64c2f84
+Cholelithiasis_CT_Others_1881,Robert Tenney,e60a48d9e803e629@c-mercor.com,2026-01-24T17:40:42.034452Z,task_263b6f92b53a4d32a56a5ae65210e4a4
+Urolithiasis_CT_Abdomen_1246,Robert Tenney,e60a48d9e803e629@c-mercor.com,2026-01-24T17:09:33.108358Z,task_11cae8007e4e47d5a00fdbe5a286fa4f
+Chronic-infarct_CT_Brain/Head_448,Adam Wilner,ib81d1580a688dc7@c-mercor.com,2026-01-24T15:54:00.600930Z,task_1ffef8bf57cc4be281f82fd7c8980829
 Aortic-dissection_CT_Others_1904,contractor p92f51,,2026-01-24T05:21:25.312733Z,task_06296a23fdee4a5498db057880a6bae2
 Renal-cyst_MR_Lumbar-Spine_1874,Miltiadis Tembelis,lf6d9d3f64a00bc5@c-mercor.com,2026-01-24T04:17:36.346823Z,task_0356ff8af638496a82e5c3b0fde36b66
 Iliac-artery-aneurysm_CT_Others_1435,contractor p92f51,,2026-01-24T03:06:43.604318Z,task_07f061c247af498cba35464793cec232

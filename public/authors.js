@@ -8,6 +8,18 @@ const statusStats = document.getElementById("statusStats");
 const statusTableBody = document.getElementById("statusTableBody");
 
 let authors = [];
+const applyTaskOverrides = (tasks) =>
+  tasks.map((task) => {
+    const normalized = (task.owned_by_user_name || "").trim().toLowerCase();
+    if (normalized === "contractor d1f023") {
+      return {
+        ...task,
+        owned_by_user_name: "Wooil Kim",
+        owned_by_user_email: "d1f02345a5a0400d@c-mercor.com",
+      };
+    }
+    return task;
+  });
 
 const normalize = (value) => (value || "").toLowerCase();
 
@@ -113,7 +125,7 @@ const applyAuthorFilter = () => {
 window.authFetch("/api/data")
   .then((response) => response.json())
   .then((data) => {
-    authors = buildAuthors(data.tasks || []);
+    authors = buildAuthors(applyTaskOverrides(data.tasks || []));
     renderAuthorTable(authors);
   })
   .catch((err) => {

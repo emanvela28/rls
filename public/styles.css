@@ -422,33 +422,36 @@ thead th {
   padding: 12px 12px;
   border-bottom: 1px solid rgba(111, 44, 255, 0.2);
   z-index: 1;
-  cursor: pointer;
-  user-select: none;
   font-size: 0.9rem;
   font-weight: 600;
-}
-
-thead th::after {
-  content: "↕";
-  color: var(--muted);
-  margin-left: 6px;
-  font-size: 0.8rem;
-}
-
-thead th.sorted-asc::after {
-  content: "↑";
-  color: var(--accent);
-}
-
-thead th.sorted-desc::after {
-  content: "↓";
-  color: var(--accent);
 }
 
 tbody td {
   padding: 12px 12px;
   border-bottom: 1px solid rgba(111, 44, 255, 0.12);
   color: var(--ink);
+}
+
+th[data-sort-key] {
+  cursor: pointer;
+  user-select: none;
+}
+
+th[data-sort-key]::after {
+  content: "↕";
+  color: var(--muted);
+  margin-left: 6px;
+  font-size: 0.8rem;
+}
+
+th[data-sort-key].sorted-asc::after {
+  content: "↑";
+  color: var(--accent);
+}
+
+th[data-sort-key].sorted-desc::after {
+  content: "↓";
+  color: var(--accent);
 }
 
 tbody tr:hover {

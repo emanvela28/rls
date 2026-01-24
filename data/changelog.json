@@ -1,5 +1,117 @@
 [
   {
+    "task_name": "Aortic-aneurysm_CT_Abdomen-pelvis_642",
+    "original_author": "Muhammad Hossain",
+    "original_author_email": "ob65449bcf28bea1@c-mercor.com",
+    "approved_at": "2026-01-24T21:06:51.924075Z",
+    "task_id": "task_088b12056cec43c5a4c72eb3be6e560f"
+  },
+  {
+    "task_name": "Cirrhosis_CT_Others_1417",
+    "original_author": "Chin Seung",
+    "original_author_email": "o03fb28856d33a72@c-mercor.com",
+    "approved_at": "2026-01-24T20:53:35.820138Z",
+    "task_id": "task_1bd97a3f5ab542588244eb4345f6bcaa"
+  },
+  {
+    "task_name": "Emphysema_CT_Chest_759",
+    "original_author": "Adam Wilner",
+    "original_author_email": "ib81d1580a688dc7@c-mercor.com",
+    "approved_at": "2026-01-24T20:52:01.689585Z",
+    "task_id": "task_10efea92b17347569737f3cb77b0e118"
+  },
+  {
+    "task_name": "Chronic-infarct_MR_Others_443",
+    "original_author": "Keith McCollister",
+    "original_author_email": "m62c40825589f29c@c-mercor.com",
+    "approved_at": "2026-01-24T20:12:03.460629Z",
+    "task_id": "task_1337dfebc5ad4daca9fe763e7f0ab3ea"
+  },
+  {
+    "task_name": "Iliac-artery-aneurysm_CT_Abdomen_1422",
+    "original_author": "Jaron Tepper",
+    "original_author_email": "p406de89e24a772d@c-mercor.com",
+    "approved_at": "2026-01-24T20:02:56.947369Z",
+    "task_id": "task_182460aead6c40eb828dff5f9b8a0203"
+  },
+  {
+    "task_name": "Bronchiectasis_CT_Chest_805",
+    "original_author": "contractor d1f023",
+    "original_author_email": "",
+    "approved_at": "2026-01-24T20:01:53.367375Z",
+    "task_id": "task_0e0c744048a74646bc53b61f41faf822"
+  },
+  {
+    "task_name": "Ascites_CT_Chest_114",
+    "original_author": "Brian D'Amore",
+    "original_author_email": "p92f5194510e036b@c-mercor.com",
+    "approved_at": "2026-01-24T19:22:13.007431Z",
+    "task_id": "task_1f8029dc71b94c8699ba24d564dc8d21"
+  },
+  {
+    "task_name": "Bronchiectasis_CT_Chest_780",
+    "original_author": "Anthony Powell",
+    "original_author_email": "a8ea247eac7c01eb@c-mercor.com",
+    "approved_at": "2026-01-24T19:11:28.253659Z",
+    "task_id": "task_1ade5ad99dff4b78b96e448bc88f7454"
+  },
+  {
+    "task_name": "Iliac-artery-aneurysm_CT_Abdomen-pelvis_558",
+    "original_author": "Ronald Gathagan",
+    "original_author_email": "icb635be60491d97@c-mercor.com",
+    "approved_at": "2026-01-24T19:00:29.448630Z",
+    "task_id": "task_1f13ad4f3e9148139f1c8ad0cfc478ef"
+  },
+  {
+    "task_name": "Aortic-aneurysm_CT_Chest_644",
+    "original_author": "Ronald Gathagan",
+    "original_author_email": "icb635be60491d97@c-mercor.com",
+    "approved_at": "2026-01-24T18:45:32.415905Z",
+    "task_id": "task_14c26f4b5580489cb2a2582ef7196487"
+  },
+  {
+    "task_name": "Cirrhosis_CT_Abdomen_1386",
+    "original_author": "Brian D'Amore",
+    "original_author_email": "p92f5194510e036b@c-mercor.com",
+    "approved_at": "2026-01-24T18:30:07.154926Z",
+    "task_id": "task_1d8767441a9d49ef989a6fb7977fb5b8"
+  },
+  {
+    "task_name": "Chronic-infarct_CT_Brain/Head_471",
+    "original_author": "Adam Wilner",
+    "original_author_email": "ib81d1580a688dc7@c-mercor.com",
+    "approved_at": "2026-01-24T18:12:47.170803Z",
+    "task_id": "task_6d6e21113f2e4a6292dfbc8628ee9206"
+  },
+  {
+    "task_name": "Chronic-infarct_CT_Brain/Head_452",
+    "original_author": "Adam Wilner",
+    "original_author_email": "ib81d1580a688dc7@c-mercor.com",
+    "approved_at": "2026-01-24T17:52:42.138805Z",
+    "task_id": "task_43b44fc451084aa1883f8824b64c2f84"
+  },
+  {
+    "task_name": "Cholelithiasis_CT_Others_1881",
+    "original_author": "Robert Tenney",
+    "original_author_email": "e60a48d9e803e629@c-mercor.com",
+    "approved_at": "2026-01-24T17:40:42.034452Z",
+    "task_id": "task_263b6f92b53a4d32a56a5ae65210e4a4"
+  },
+  {
+    "task_name": "Urolithiasis_CT_Abdomen_1246",
+    "original_author": "Robert Tenney",
+    "original_author_email": "e60a48d9e803e629@c-mercor.com",
+    "approved_at": "2026-01-24T17:09:33.108358Z",
+    "task_id": "task_11cae8007e4e47d5a00fdbe5a286fa4f"
+  },
+  {
+    "task_name": "Chronic-infarct_CT_Brain/Head_448",
+    "original_author": "Adam Wilner",
+    "original_author_email": "ib81d1580a688dc7@c-mercor.com",
+    "approved_at": "2026-01-24T15:54:00.600930Z",
+    "task_id": "task_1ffef8bf57cc4be281f82fd7c8980829"
+  },
+  {
     "task_name": "Aortic-dissection_CT_Others_1904",
     "original_author": "contractor p92f51",
     "original_author_email": "",

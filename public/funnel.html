@@ -58,7 +58,10 @@
             <p class="eyebrow" id="detailEmail">Email</p>
             <h2 id="detailName">Author</h2>
           </div>
-          <span id="detailCount">— tasks</span>
+          <div class="table-header-actions">
+            <span id="detailScore">— score</span>
+            <span id="detailCount">— tasks</span>
+          </div>
         </div>
         <div class="table-scroll">
           <table>
@@ -82,19 +85,6 @@
           </div>
           <div class="table-header-actions">
             <div class="chips" id="stageFilterChips"></div>
-            <label class="pill-select">
-              <span>Sort</span>
-              <select id="progressSort">
-                <option value="stage-desc">Stage (Approved → Claimed)</option>
-                <option value="stage-asc">Stage (Claimed → Approved)</option>
-                <option value="name-asc">Name (A → Z)</option>
-                <option value="name-desc">Name (Z → A)</option>
-                <option value="approved-desc">Approved (high → low)</option>
-                <option value="approved-asc">Approved (low → high)</option>
-                <option value="submitted-desc">Submitted (high → low)</option>
-                <option value="claimed-desc">Claimed (high → low)</option>
-              </select>
-            </label>
             <span id="authorProgressCount">— authors</span>
           </div>
         </div>
@@ -102,12 +92,13 @@
           <table>
             <thead>
               <tr>
-                <th>Author</th>
-                <th>Email</th>
-                <th>Highest Stage</th>
-                <th>Approved</th>
-                <th>Submitted</th>
-                <th>Claimed</th>
+                <th data-sort-key="name">Author</th>
+                <th data-sort-key="email">Email</th>
+                <th data-sort-key="stage">Highest Stage</th>
+                <th data-sort-key="score">Contributor Score</th>
+                <th data-sort-key="approved">Approved</th>
+                <th data-sort-key="submitted">Submitted</th>
+                <th data-sort-key="claimed">Claimed</th>
               </tr>
             </thead>
             <tbody id="progressTableBody"></tbody>

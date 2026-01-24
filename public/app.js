@@ -19,6 +19,18 @@ let sortDirection = "desc";
 let currentPage = 1;
 let pageSize = Number(pageSizeSelect.value);
 let lastFilteredSorted = [];
+const applyTaskOverrides = (tasks) =>
+  tasks.map((task) => {
+    const normalized = (task.owned_by_user_name || "").trim().toLowerCase();
+    if (normalized === "contractor d1f023") {
+      return {
+        ...task,
+        owned_by_user_name: "Wooil Kim",
+        owned_by_user_email: "d1f02345a5a0400d@c-mercor.com",
+      };
+    }
+    return task;
+  });
 
 const formatDate = (value) => {
   if (!value) return "—";
@@ -178,7 +190,7 @@ window.authFetch("/api/data")
   .then((data) => {
     generatedAtEl.textContent = `Updated: ${data.generated_at || "—"}`;
     rowCountEl.textContent = `Rows: ${data.rows_returned || 0}`;
-    allTasks = data.tasks || [];
+    allTasks = applyTaskOverrides(data.tasks || []);
     renderStats(allTasks);
     populateStatusFilter(allTasks);
     applyFilters();

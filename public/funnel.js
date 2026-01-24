@@ -7,12 +7,24 @@ const cohortCountsEl = document.getElementById("cohortCounts");
 const progressTableBody = document.getElementById("progressTableBody");
 const authorProgressCountEl = document.getElementById("authorProgressCount");
 const stageFilterChips = document.getElementById("stageFilterChips");
-const progressSortSelect = document.getElementById("progressSort");
 const detailPanel = document.getElementById("authorDetail");
 const detailNameEl = document.getElementById("detailName");
 const detailEmailEl = document.getElementById("detailEmail");
 const detailCountEl = document.getElementById("detailCount");
 const detailTableBody = document.getElementById("detailTableBody");
+const detailScoreEl = document.getElementById("detailScore");
+const applyTaskOverrides = (tasks) =>
+  tasks.map((task) => {
+    const normalized = (task.owned_by_user_name || "").trim().toLowerCase();
+    if (normalized === "contractor d1f023") {
+      return {
+        ...task,
+        owned_by_user_name: "Wooil Kim",
+        owned_by_user_email: "d1f02345a5a0400d@c-mercor.com",
+      };
+    }
+    return task;
+  });
 if (detailPanel) {
   detailPanel.hidden = true;
 }
@@ -25,6 +37,12 @@ const STAGE_LABELS = {
   approved: "Approved / QA Awaiting Review",
   submitted: "Awaiting Review / In Review",
   claimed: "Pending",
+};
+// Contributor weights ignore statuses authors don't control (QA, in review)
+const CONTRIBUTOR_WEIGHTS = {
+  approved: 3,
+  "awaiting review": 1.5,
+  pending: 0.5,
 };
 
 const pct = (count, total) => {
@@ -44,6 +62,11 @@ const normalizeKey = (name, email) => {
   if (email && email.trim()) return email.trim().toLowerCase();
   if (name && name.trim()) return name.trim().toLowerCase();
   return "";
+};
+
+const contributionWeight = (status) => {
+  const normalized = (status || "").trim().toLowerCase();
+  return CONTRIBUTOR_WEIGHTS[normalized] || 0;
 };
 
 const buildFunnel = (tasks) => {
@@ -71,9 +94,11 @@ const buildFunnel = (tasks) => {
         email,
         bestStage: "",
         counts: { approved: 0, submitted: 0, claimed: 0 },
+        contributionScore: 0,
       };
 
     entry.counts[stage] += 1;
+    entry.contributionScore += contributionWeight(task.status_name);
     const currentRank = STAGE_ORDER.indexOf(entry.bestStage);
     const incomingRank = STAGE_ORDER.indexOf(stage);
     if (incomingRank > currentRank) {
@@ -122,7 +147,8 @@ const buildFunnel = (tasks) => {
 };
 
 let stageFilter = "all";
-let sortKey = "stage-desc";
+let sortKey = "stage";
+let sortDirection = "desc";
 let cachedFunnel = null;
 
 const renderStageFilterChips = () => {
@@ -286,6 +312,7 @@ const renderCohorts = (funnel) => {
 const renderProgressTable = (funnel) => {
   progressTableBody.innerHTML = "";
   authorProgressCountEl.textContent = `${funnel.authorList.length.toLocaleString()} authors`;
+  setHeaderSortState();
 
   let rows = [...funnel.authorList];
 
@@ -293,23 +320,20 @@ const renderProgressTable = (funnel) => {
     rows = rows.filter((a) => a.bestStage === stageFilter);
   }
 
-  const sorters = {
-    "stage-desc": (a, b) =>
-      STAGE_ORDER.indexOf(b.bestStage) - STAGE_ORDER.indexOf(a.bestStage) ||
-      a.name.localeCompare(b.name),
-    "stage-asc": (a, b) =>
-      STAGE_ORDER.indexOf(a.bestStage) - STAGE_ORDER.indexOf(b.bestStage) ||
-      a.name.localeCompare(b.name),
-    "name-asc": (a, b) => a.name.localeCompare(b.name),
-    "name-desc": (a, b) => b.name.localeCompare(a.name),
-    "approved-desc": (a, b) => b.counts.approved - a.counts.approved || a.name.localeCompare(b.name),
-    "approved-asc": (a, b) => a.counts.approved - b.counts.approved || a.name.localeCompare(b.name),
-    "submitted-desc": (a, b) => b.counts.submitted - a.counts.submitted || a.name.localeCompare(b.name),
-    "claimed-desc": (a, b) => b.counts.claimed - a.counts.claimed || a.name.localeCompare(b.name),
+  const baseSorters = {
+    stage: (a, b) => STAGE_ORDER.indexOf(a.bestStage) - STAGE_ORDER.indexOf(b.bestStage) || a.name.localeCompare(b.name),
+    name: (a, b) => a.name.localeCompare(b.name),
+    email: (a, b) => (a.email || "").localeCompare(b.email || ""),
+    approved: (a, b) => a.counts.approved - b.counts.approved || a.name.localeCompare(b.name),
+    submitted: (a, b) => a.counts.submitted - b.counts.submitted || a.name.localeCompare(b.name),
+    claimed: (a, b) => a.counts.claimed - b.counts.claimed || a.name.localeCompare(b.name),
+    score: (a, b) => a.contributionScore - b.contributionScore || a.name.localeCompare(b.name),
   };
-
-  const sorter = sorters[sortKey] || sorters["stage-desc"];
+  const sorter = baseSorters[sortKey] || baseSorters.stage;
   rows.sort(sorter);
+  if (sortDirection === "desc") {
+    rows.reverse();
+  }
 
   const fragment = document.createDocumentFragment();
   rows.forEach((author) => {
@@ -318,6 +342,7 @@ const renderProgressTable = (funnel) => {
       <td>${author.name}</td>
       <td>${author.email || "—"}</td>
       <td><span class="stage-pill stage-pill--${author.bestStage}">${STAGE_LABELS[author.bestStage] || "—"}</span></td>
+      <td>${author.contributionScore.toFixed(1)}</td>
       <td>${author.counts.approved}</td>
       <td>${author.counts.submitted}</td>
       <td>${author.counts.claimed}</td>
@@ -332,7 +357,7 @@ window.authFetch("/api/data")
   .then((response) => response.json())
   .then((data) => {
     generatedAtEl.textContent = `Updated: ${data.generated_at || "—"}`;
-    const tasks = data.tasks || [];
+    const tasks = applyTaskOverrides(data.tasks || []);
     window.__allTasks = tasks;
     const funnel = buildFunnel(tasks);
     cachedFunnel = funnel;
@@ -373,6 +398,10 @@ const showAuthorTasks = (author, tasks) => {
   detailNameEl.textContent = author.name;
   detailEmailEl.textContent = author.email || "No email";
   detailCountEl.textContent = `${matching.length} tasks`;
+  if (detailScoreEl) {
+    const score = typeof author.contributionScore === "number" ? author.contributionScore.toFixed(1) : "—";
+    detailScoreEl.textContent = `Score: ${score}`;
+  }
   detailTableBody.innerHTML = "";
 
   matching
@@ -390,9 +419,45 @@ const showAuthorTasks = (author, tasks) => {
   detailPanel.scrollIntoView({ behavior: "smooth", block: "start" });
 };
 
-if (progressSortSelect) {
-  progressSortSelect.addEventListener("change", (e) => {
-    sortKey = e.target.value;
-    renderProgressTable(cachedFunnel);
+const progressTableEl = document.querySelector("#progressTableBody")?.closest("table");
+const progressHeaders = progressTableEl
+  ? progressTableEl.querySelectorAll("thead th[data-sort-key]")
+  : [];
+
+const syncSortSelect = () => {
+  // no-op (dropdown removed)
+};
+
+const clearHeaderSortState = () => {
+  progressHeaders.forEach((th) => th.classList.remove("sorted-asc", "sorted-desc"));
+};
+
+const applyHeaderSort = (key) => {
+  if (sortKey === key) {
+    sortDirection = sortDirection === "asc" ? "desc" : "asc";
+  } else {
+    sortKey = key;
+    sortDirection = "desc";
+  }
+  clearHeaderSortState();
+  (progressHeaders || []).forEach((th) => {
+    if (th.dataset.sortKey === sortKey) {
+      th.classList.add(sortDirection === "asc" ? "sorted-asc" : "sorted-desc");
+    }
   });
-}
+  syncSortSelect();
+  renderProgressTable(cachedFunnel);
+};
+
+progressHeaders.forEach((th) => {
+  th.addEventListener("click", () => applyHeaderSort(th.dataset.sortKey));
+});
+
+const setHeaderSortState = () => {
+  clearHeaderSortState();
+  progressHeaders.forEach((th) => {
+    if (th.dataset.sortKey === sortKey) {
+      th.classList.add(sortDirection === "asc" ? "sorted-asc" : "sorted-desc");
+    }
+  });
+};
