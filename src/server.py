@@ -103,6 +103,7 @@ def verify_token(
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory=PUBLIC_DIR), name="static")
+NO_CACHE_HEADERS = {"Cache-Control": "no-store"}
 
 def run_scrape_once():
     with SCRAPE_LOCK:
@@ -165,22 +166,22 @@ def format_ts(epoch_seconds: float) -> str:
 
 @app.get("/")
 def index():
-    return FileResponse(PUBLIC_DIR / "index.html")
+    return FileResponse(PUBLIC_DIR / "index.html", headers=NO_CACHE_HEADERS)
 
 
 @app.get("/changelog")
 def changelog():
-    return FileResponse(PUBLIC_DIR / "changelog.html")
+    return FileResponse(PUBLIC_DIR / "changelog.html", headers=NO_CACHE_HEADERS)
 
 
 @app.get("/authors")
 def authors():
-    return FileResponse(PUBLIC_DIR / "authors.html")
+    return FileResponse(PUBLIC_DIR / "authors.html", headers=NO_CACHE_HEADERS)
 
 
 @app.get("/funnel")
 def funnel():
-    return FileResponse(PUBLIC_DIR / "funnel.html")
+    return FileResponse(PUBLIC_DIR / "funnel.html", headers=NO_CACHE_HEADERS)
 
 
 @app.get("/config.js")
