@@ -1,3 +1,4 @@
+import csv
 import json
 import os
 import sys
@@ -30,6 +31,7 @@ JWKS_CACHE = {"expires_at": 0, "keys": []}
 SCRAPE_INTERVAL_SECONDS = 180
 SCRAPE_STATE = {"running": False, "last_run": 0.0, "last_error": ""}
 SCRAPE_LOCK = threading.Lock()
+EMAIL_MAP_CACHE = {"mtime": 0.0, "data": {}}
 
 
 def get_jwks():
@@ -164,6 +166,36 @@ def format_ts(epoch_seconds: float) -> str:
     return datetime.fromtimestamp(epoch_seconds, tz=timezone.utc).isoformat()
 
 
+def load_email_map() -> dict:
+    """Load email -> display name mapping from data/emails.csv."""
+    csv_path = DATA_DIR / "emails.csv"
+    if not csv_path.exists():
+        return {}
+    mtime = csv_path.stat().st_mtime
+    if EMAIL_MAP_CACHE["mtime"] == mtime and EMAIL_MAP_CACHE["data"]:
+        return EMAIL_MAP_CACHE["data"]
+
+    mapping = {}
+    try:
+        with csv_path.open(newline="", encoding="utf-8") as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                name = (row.get("Name") or "").strip()
+                primary = (row.get("Email") or "").strip().lower()
+                contractor = (row.get("Contractor Email") or "").strip().lower()
+                if name:
+                    if primary:
+                        mapping[primary] = name
+                    if contractor:
+                        mapping[contractor] = name
+    except Exception:
+        return {}
+
+    EMAIL_MAP_CACHE["mtime"] = mtime
+    EMAIL_MAP_CACHE["data"] = mapping
+    return mapping
+
+
 @app.get("/")
 def index():
     return FileResponse(PUBLIC_DIR / "index.html", headers=NO_CACHE_HEADERS)
@@ -204,7 +236,11 @@ def api_data(payload=Depends(verify_token)):
         ensure_scrape_fresh(blocking=True)
     if not data_file.exists():
         raise HTTPException(status_code=503, detail="data.json not available yet.")
-    return json.loads(data_file.read_text(encoding="utf-8"))
+    data = json.loads(data_file.read_text(encoding="utf-8"))
+    email_map = load_email_map()
+    if email_map:
+        data["email_map"] = email_map
+    return data
 
 
 @app.get("/api/changelog")

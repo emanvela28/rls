@@ -1,4 +1,17 @@
 task_name,original_author,original_author_email,approved_at,task_id
+Cirrhosis_MR_Others_163,Muhammad Hossain,ob65449bcf28bea1@c-mercor.com,2026-01-24T23:51:28.279987Z,task_1010578900ee4f3584cb17ce2aba2304
+Cardiomegaly_CT_Chest_1563,Adam Wilner,ib81d1580a688dc7@c-mercor.com,2026-01-24T23:07:46.123820Z,task_0ead56b3f5234a1c9d8b39ba9ed5d470
+Emphysema_CT_Abdomen_760,contractor ob6544,,2026-01-24T22:51:35.342970Z,task_08c3f038007f46c0936cae595c7a7d36
+Hemangioma_MR_Thoracic-Spine_1020,Gregg Blumberg,p2fb820c41b37e0d@c-mercor.com,2026-01-24T22:44:40.107041Z,task_07671aedaa9e4c44b6a0c6c5a915f504
+Cardiomegaly_CT_Chest_067,Corey C.,medical90@c-mercor.com,2026-01-24T22:41:22.028637Z,task_06be8115abed4cd5af0ba68b7d711093
+Uterine-fibroids_CT_Chest_1232,Jeffrey Ross,nd64ef2ca0b43af5@c-mercor.com,2026-01-24T22:30:10.028065Z,task_2c9ecf6664a24ab597c4ed432f407fb2
+Spinal-stenosis_MR_Lumbar-Spine_332,Miltiadis Tembelis,lf6d9d3f64a00bc5@c-mercor.com,2026-01-24T22:16:26.022273Z,task_0d2ee59797c4482caad1c96e35a020a0
+Choledocholithiasis_MR_Others_1029,Erich  M,medical61@c-mercor.com,2026-01-24T22:04:50.581612Z,task_0dcbbbe3b72447c1ad160d20c0a92fa4
+Urolithiasis_CT_Abdomen_1470,Miltiadis Tembelis,lf6d9d3f64a00bc5@c-mercor.com,2026-01-24T21:42:35.720876Z,task_0cf3c55ec4134f2e850e9a877c962a44
+Uterine-fibroids_MR_Abdomen_1287,Elizabeth Edney,o3d49c96ae3158cc@c-mercor.com,2026-01-24T21:37:51.582943Z,task_0b9ee0ef3e96431dafbf6868fe83ab59
+Hemangioma_MR_Pelvis_1079,Nhi  Huynh,k85df0fff33fda13@c-mercor.com,2026-01-24T21:34:06.639186Z,task_04cd9b4db65f4205b26c3253189bef6f
+Disc-protrusion_MR_Thoracic-Spine_378,Gregg Blumberg,p2fb820c41b37e0d@c-mercor.com,2026-01-24T21:24:59.731628Z,task_02e36346e1374286850b6d4aa2ae4a00
+Ovarian-cyst_MR_Pelvis_2028,Anthony Powell,a8ea247eac7c01eb@c-mercor.com,2026-01-24T21:21:02.382132Z,task_09cecba374424a818c6feb19b3f4a865
 Aortic-aneurysm_CT_Abdomen-pelvis_642,Muhammad Hossain,ob65449bcf28bea1@c-mercor.com,2026-01-24T21:06:51.924075Z,task_088b12056cec43c5a4c72eb3be6e560f
 Cirrhosis_CT_Others_1417,Chin Seung,o03fb28856d33a72@c-mercor.com,2026-01-24T20:53:35.820138Z,task_1bd97a3f5ab542588244eb4345f6bcaa
 Emphysema_CT_Chest_759,Adam Wilner,ib81d1580a688dc7@c-mercor.com,2026-01-24T20:52:01.689585Z,task_10efea92b17347569737f3cb77b0e118

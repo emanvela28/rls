@@ -13,17 +13,51 @@ const detailEmailEl = document.getElementById("detailEmail");
 const detailCountEl = document.getElementById("detailCount");
 const detailTableBody = document.getElementById("detailTableBody");
 const detailScoreEl = document.getElementById("detailScore");
-const applyTaskOverrides = (tasks) =>
+const OVERRIDE_BY_EMAIL = {
+  "g748044d6fa8c271@c-mercor.com": { name: "HAMILTON ADRIAN", email: "g748044d6fa8c271@c-mercor.com" },
+  "p92f5194510e036b@c-mercor.com": { name: "Brian D'Amore", email: "p92f5194510e036b@c-mercor.com" },
+  "hd5c2be12ae2aca6@c-mercor.com": { name: "Howard Yan", email: "hd5c2be12ae2aca6@c-mercor.com" },
+  "ob65449bcf28bea1@c-mercor.com": { name: "Muhammad Hossain", email: "ob65449bcf28bea1@c-mercor.com" },
+  "g58b2d103e8b0a86@c-mercor.com": { name: "Brandon Evans", email: "g58b2d103e8b0a86@c-mercor.com" },
+  "d1f02345a5a0400d@c-mercor.com": { name: "Wooil Kim", email: "d1f02345a5a0400d@c-mercor.com" },
+};
+const OVERRIDE_BY_NAME = {
+  "contractor d1f023": { name: "Wooil Kim", email: "d1f02345a5a0400d@c-mercor.com" },
+  "contractor p92f51": { name: "Brian D'Amore", email: "p92f5194510e036b@c-mercor.com" },
+  "contractor hd5c2b": { name: "Howard Yan", email: "hd5c2be12ae2aca6@c-mercor.com" },
+  "contractor ob544": { name: "Muhammad Hossain", email: "ob65449bcf28bea1@c-mercor.com" },
+  "contractor ob6544": { name: "Muhammad Hossain", email: "ob65449bcf28bea1@c-mercor.com" },
+  "contractor g58b2d": { name: "Brandon Evans", email: "g58b2d103e8b0a86@c-mercor.com" },
+  "hamilton adrian": { name: "HAMILTON ADRIAN", email: "g748044d6fa8c271@c-mercor.com" },
+};
+const normalizeEmail = (value) => (value || "").trim().toLowerCase();
+const normalizeName = (value) => (value || "").trim().toLowerCase();
+const applyTaskOverrides = (tasks, emailMap = {}) =>
   tasks.map((task) => {
-    const normalized = (task.owned_by_user_name || "").trim().toLowerCase();
-    if (normalized === "contractor d1f023") {
-      return {
-        ...task,
-        owned_by_user_name: "Wooil Kim",
-        owned_by_user_email: "d1f02345a5a0400d@c-mercor.com",
-      };
+    const normalizedEmail = normalizeEmail(task.owned_by_user_email);
+    const normalizedName = normalizeName(task.owned_by_user_name);
+    let updated = { ...task };
+
+    // Priority: explicit email map from server
+    if (normalizedEmail && emailMap[normalizedEmail]) {
+      updated.owned_by_user_name = emailMap[normalizedEmail];
     }
-    return task;
+
+    // Explicit email overrides
+    const emailOverride = normalizedEmail ? OVERRIDE_BY_EMAIL[normalizedEmail] : null;
+    if (emailOverride) {
+      updated.owned_by_user_name = emailOverride.name;
+      updated.owned_by_user_email = emailOverride.email;
+    }
+
+    // Name-based overrides (for contractor-style names or missing email matches)
+    const nameOverride = OVERRIDE_BY_NAME[normalizedName];
+    if (nameOverride) {
+      updated.owned_by_user_name = nameOverride.name;
+      updated.owned_by_user_email = updated.owned_by_user_email || nameOverride.email;
+    }
+
+    return updated;
   });
 if (detailPanel) {
   detailPanel.hidden = true;
@@ -357,7 +391,8 @@ window.authFetch("/api/data")
   .then((response) => response.json())
   .then((data) => {
     generatedAtEl.textContent = `Updated: ${data.generated_at || "—"}`;
-    const tasks = applyTaskOverrides(data.tasks || []);
+    const emailMap = data.email_map || {};
+    const tasks = applyTaskOverrides(data.tasks || [], emailMap);
     window.__allTasks = tasks;
     const funnel = buildFunnel(tasks);
     cachedFunnel = funnel;
