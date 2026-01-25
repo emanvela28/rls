@@ -32,6 +32,23 @@ SCRAPE_INTERVAL_SECONDS = 180
 SCRAPE_STATE = {"running": False, "last_run": 0.0, "last_error": ""}
 SCRAPE_LOCK = threading.Lock()
 EMAIL_MAP_CACHE = {"mtime": 0.0, "data": {}}
+OVERRIDE_BY_EMAIL = {
+    "g748044d6fa8c271@c-mercor.com": {"name": "HAMILTON ADRIAN", "email": "g748044d6fa8c271@c-mercor.com"},
+    "p92f5194510e036b@c-mercor.com": {"name": "Brian D'Amore", "email": "p92f5194510e036b@c-mercor.com"},
+    "hd5c2be12ae2aca6@c-mercor.com": {"name": "Howard Yan", "email": "hd5c2be12ae2aca6@c-mercor.com"},
+    "ob65449bcf28bea1@c-mercor.com": {"name": "Muhammad Hossain", "email": "ob65449bcf28bea1@c-mercor.com"},
+    "g58b2d103e8b0a86@c-mercor.com": {"name": "Brandon Evans", "email": "g58b2d103e8b0a86@c-mercor.com"},
+    "d1f02345a5a0400d@c-mercor.com": {"name": "Wooil Kim", "email": "d1f02345a5a0400d@c-mercor.com"},
+}
+OVERRIDE_BY_NAME = {
+    "contractor d1f023": {"name": "Wooil Kim", "email": "d1f02345a5a0400d@c-mercor.com"},
+    "contractor p92f51": {"name": "Brian D'Amore", "email": "p92f5194510e036b@c-mercor.com"},
+    "contractor hd5c2b": {"name": "Howard Yan", "email": "hd5c2be12ae2aca6@c-mercor.com"},
+    "contractor ob544": {"name": "Muhammad Hossain", "email": "ob65449bcf28bea1@c-mercor.com"},
+    "contractor ob6544": {"name": "Muhammad Hossain", "email": "ob65449bcf28bea1@c-mercor.com"},
+    "contractor g58b2d": {"name": "Brandon Evans", "email": "g58b2d103e8b0a86@c-mercor.com"},
+    "hamilton adrian": {"name": "HAMILTON ADRIAN", "email": "g748044d6fa8c271@c-mercor.com"},
+}
 
 
 def get_jwks():
@@ -196,6 +213,35 @@ def load_email_map() -> dict:
     return mapping
 
 
+def apply_name_overrides(tasks: list, email_map: dict) -> list:
+    """Normalize author names/emails using emails.csv map and explicit overrides."""
+    normalized_map = {k.lower(): v for k, v in (email_map or {}).items()}
+    normalized_email_override = {k.lower(): v for k, v in OVERRIDE_BY_EMAIL.items()}
+    normalized_name_override = {k.lower(): v for k, v in OVERRIDE_BY_NAME.items()}
+
+    normalized_tasks = []
+    for task in tasks:
+        name = (task.get("owned_by_user_name") or "").strip()
+        email = (task.get("owned_by_user_email") or "").strip().lower()
+        updated = dict(task)
+
+        if email and email in normalized_map:
+            updated["owned_by_user_name"] = normalized_map[email]
+        if email and email in normalized_email_override:
+            updated["owned_by_user_name"] = normalized_email_override[email]["name"]
+            updated["owned_by_user_email"] = normalized_email_override[email]["email"]
+
+        norm_name = name.lower()
+        if norm_name in normalized_name_override:
+            override = normalized_name_override[norm_name]
+            updated["owned_by_user_name"] = override["name"]
+            if not updated.get("owned_by_user_email"):
+                updated["owned_by_user_email"] = override["email"]
+
+        normalized_tasks.append(updated)
+    return normalized_tasks
+
+
 @app.get("/")
 def index():
     return FileResponse(PUBLIC_DIR / "index.html", headers=NO_CACHE_HEADERS)
@@ -238,8 +284,12 @@ def api_data(payload=Depends(verify_token)):
         raise HTTPException(status_code=503, detail="data.json not available yet.")
     data = json.loads(data_file.read_text(encoding="utf-8"))
     email_map = load_email_map()
+    tasks = data.get("tasks") or []
     if email_map:
         data["email_map"] = email_map
+        data["tasks"] = apply_name_overrides(tasks, email_map)
+    else:
+        data["tasks"] = apply_name_overrides(tasks, {})
     return data
 
 

@@ -28,6 +28,23 @@ EMAILS_CSV = Path("data/emails.csv")
 USERS_URL_TEMPLATE = "https://api.studio.mercor.com/users/campaign/{campaign_id}"
 AUTHOR_CUSTOM_FIELD_ID = "field_f149502069bd4fde84cc33a35373fd83"
 SHEET_SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+OVERRIDE_BY_EMAIL = {
+    "g748044d6fa8c271@c-mercor.com": {"name": "HAMILTON ADRIAN", "email": "g748044d6fa8c271@c-mercor.com"},
+    "p92f5194510e036b@c-mercor.com": {"name": "Brian D'Amore", "email": "p92f5194510e036b@c-mercor.com"},
+    "hd5c2be12ae2aca6@c-mercor.com": {"name": "Howard Yan", "email": "hd5c2be12ae2aca6@c-mercor.com"},
+    "ob65449bcf28bea1@c-mercor.com": {"name": "Muhammad Hossain", "email": "ob65449bcf28bea1@c-mercor.com"},
+    "g58b2d103e8b0a86@c-mercor.com": {"name": "Brandon Evans", "email": "g58b2d103e8b0a86@c-mercor.com"},
+    "d1f02345a5a0400d@c-mercor.com": {"name": "Wooil Kim", "email": "d1f02345a5a0400d@c-mercor.com"},
+}
+OVERRIDE_BY_NAME = {
+    "contractor d1f023": {"name": "Wooil Kim", "email": "d1f02345a5a0400d@c-mercor.com"},
+    "contractor p92f51": {"name": "Brian D'Amore", "email": "p92f5194510e036b@c-mercor.com"},
+    "contractor hd5c2b": {"name": "Howard Yan", "email": "hd5c2be12ae2aca6@c-mercor.com"},
+    "contractor ob544": {"name": "Muhammad Hossain", "email": "ob65449bcf28bea1@c-mercor.com"},
+    "contractor ob6544": {"name": "Muhammad Hossain", "email": "ob65449bcf28bea1@c-mercor.com"},
+    "contractor g58b2d": {"name": "Brandon Evans", "email": "g58b2d103e8b0a86@c-mercor.com"},
+    "hamilton adrian": {"name": "HAMILTON ADRIAN", "email": "g748044d6fa8c271@c-mercor.com"},
+}
 
 
 def load_api_key() -> str:
@@ -301,6 +318,59 @@ def apply_email_overrides(email_by_name: dict) -> dict:
     return email_by_name
 
 
+def load_email_name_map(path: Path) -> dict:
+    """Map email (personal or contractor) to display name from emails.csv."""
+    mapping = {}
+    try:
+        with path.open(newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                name = (row.get("Name") or "").strip()
+                email = (row.get("Email") or "").strip().lower()
+                contractor = (row.get("Contractor Email") or "").strip().lower()
+                if name:
+                    if email:
+                        mapping[email] = name
+                    if contractor:
+                        mapping[contractor] = name
+    except FileNotFoundError:
+        pass
+    return mapping
+
+
+def apply_name_overrides(tasks: list, email_name_map: dict, contractor_email_map: dict | None = None) -> list:
+    """Normalize author names/emails using emails.csv map, contractor-to-personal, and explicit overrides."""
+    norm_email_map = {k.lower(): v for k, v in (email_name_map or {}).items()}
+    norm_email_override = {k.lower(): v for k, v in OVERRIDE_BY_EMAIL.items()}
+    norm_name_override = {k.lower(): v for k, v in OVERRIDE_BY_NAME.items()}
+    contractor_email_map = {k.lower(): v for k, v in (contractor_email_map or {}).items()}
+
+    normalized = []
+    for task in tasks:
+        updated = dict(task)
+        email = (task.get("owned_by_user_email") or "").strip().lower()
+        # If this is a contractor email and we have a personal email, prefer the personal email.
+        if email and email in contractor_email_map:
+            email = contractor_email_map[email].strip().lower()
+            updated["owned_by_user_email"] = email
+        name = (task.get("owned_by_user_name") or "").strip()
+
+        if email and email in norm_email_map:
+            updated["owned_by_user_name"] = norm_email_map[email]
+        if email and email in norm_email_override:
+            updated["owned_by_user_name"] = norm_email_override[email]["name"]
+            updated["owned_by_user_email"] = norm_email_override[email]["email"]
+
+        norm_name = name.lower()
+        if norm_name in norm_name_override:
+            updated["owned_by_user_name"] = norm_name_override[norm_name]["name"]
+            if not updated.get("owned_by_user_email"):
+                updated["owned_by_user_email"] = norm_name_override[norm_name]["email"]
+
+        normalized.append(updated)
+    return normalized
+
+
 def tsv_row(values):
     cleaned = []
     for v in values:
@@ -387,6 +457,8 @@ def main():
     tasks = payload.get("tasks", [])
     if not isinstance(tasks, list):
         raise SystemExit("Unexpected JSON shape: payload['tasks'] is not a list")
+    email_name_map = load_email_name_map(EMAILS_CSV)
+    tasks = apply_name_overrides(tasks, email_name_map, contractor_email_map)
 
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     conn = init_db()
@@ -395,6 +467,7 @@ def main():
     sheet_id, sheet_tab, creds_raw, backfill = load_sheet_config()
     creds_info = parse_service_account_info(creds_raw)
     contractor_email_map = load_contractor_email_map(EMAILS_CSV)
+    email_name_map = load_email_name_map(EMAILS_CSV)
     if sheet_id and not creds_info:
         print(
             "Warning: GOOGLE_SERVICE_ACCOUNT_JSON is missing or invalid; skipping sheet append.",
@@ -447,9 +520,11 @@ def main():
 
         if task_id and status_name in {"Approved", "QA Awaiting Review"}:
             approval_author = resolve_owner_name(t)
-            approval_email = users_email_by_name.get(
-                normalize_name(approval_author), ""
-            )
+            approval_email = (t.get("owned_by_user_email") or "").strip()
+            if not approval_email:
+                approval_email = users_email_by_name.get(
+                    normalize_name(approval_author), ""
+                )
             approved_at = t.get("approved_at") or t.get("updated_at") or ts
             append_approval_log(
                 conn,
@@ -477,7 +552,9 @@ def main():
                 approved_ids.add(task_id)
 
         owned_by_name = resolve_owner_name(t)
-        owned_by_email = users_email_by_name.get(normalize_name(owned_by_name), "")
+        owned_by_email = (t.get("owned_by_user_email") or "").strip()
+        if not owned_by_email:
+            owned_by_email = users_email_by_name.get(normalize_name(owned_by_name), "")
 
         row = [
             t.get("task_name"),

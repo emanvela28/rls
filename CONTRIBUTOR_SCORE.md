@@ -17,4 +17,3 @@ Usage in UI:
 
 Notes:
 - Because QA/In Review are excluded, a long reviewer queue won't inflate a writer's score.
-- If you want recency weighting later, we can add a time decay on top of this base score.
