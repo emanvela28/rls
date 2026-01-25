@@ -457,6 +457,7 @@ def main():
     tasks = payload.get("tasks", [])
     if not isinstance(tasks, list):
         raise SystemExit("Unexpected JSON shape: payload['tasks'] is not a list")
+    contractor_email_map = load_contractor_email_map(EMAILS_CSV)
     email_name_map = load_email_name_map(EMAILS_CSV)
     tasks = apply_name_overrides(tasks, email_name_map, contractor_email_map)
 
@@ -466,8 +467,7 @@ def main():
     approved_ids = load_approved_task_ids(conn)
     sheet_id, sheet_tab, creds_raw, backfill = load_sheet_config()
     creds_info = parse_service_account_info(creds_raw)
-    contractor_email_map = load_contractor_email_map(EMAILS_CSV)
-    email_name_map = load_email_name_map(EMAILS_CSV)
+    # contractor_email_map already loaded above for overrides
     if sheet_id and not creds_info:
         print(
             "Warning: GOOGLE_SERVICE_ACCOUNT_JSON is missing or invalid; skipping sheet append.",
