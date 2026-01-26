@@ -165,6 +165,25 @@ def normalize_name(name: str) -> str:
     return " ".join(name.lower().split())
 
 
+def extract_contractor_code(name: str) -> str:
+    if not name:
+        return ""
+    lowered = name.strip().lower()
+    if lowered.startswith("contractor "):
+        return lowered.split(None, 1)[1].strip()
+    return ""
+
+
+def find_contractor_match_by_code(code: str, contractor_email_map: dict):
+    if not code:
+        return None
+    for contractor_email, info in contractor_email_map.items():
+        local = contractor_email.split("@", 1)[0]
+        if local.startswith(code):
+            return info
+    return None
+
+
 def resolve_owner_name(task: dict) -> str:
     owned_by = (task.get("owned_by_user_name") or "").strip()
     if owned_by:
@@ -281,10 +300,15 @@ def load_contractor_email_map(path: str) -> dict:
         with open(path, newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
+                name = (row.get("Name") or "").strip()
                 contractor_email = (row.get("Contractor Email") or "").strip().lower()
                 personal_email = (row.get("Email") or "").strip()
-                if contractor_email and personal_email:
-                    mapping[contractor_email] = personal_email
+                if contractor_email and (personal_email or name):
+                    mapping[contractor_email] = {
+                        "name": name,
+                        "email": personal_email,
+                        "contractor_email": contractor_email,
+                    }
     except FileNotFoundError:
         pass
     return mapping
@@ -535,15 +559,23 @@ def main():
                 approved_at,
             )
             if backfill or task_id not in approved_ids:
+                sheet_author = approval_author
                 sheet_email = approval_email
+                contractor_match = None
                 if approval_email:
-                    sheet_email = contractor_email_map.get(
-                        approval_email.lower(), approval_email
+                    contractor_match = contractor_email_map.get(approval_email.lower())
+                else:
+                    contractor_code = extract_contractor_code(approval_author)
+                    contractor_match = find_contractor_match_by_code(
+                        contractor_code, contractor_email_map
                     )
+                if contractor_match:
+                    sheet_author = contractor_match.get("name") or sheet_author
+                    sheet_email = contractor_match.get("email") or sheet_email
                 new_sheet_rows.append(
                     [
                         t.get("task_name") or "",
-                        approval_author,
+                        sheet_author,
                         sheet_email,
                         approved_at,
                         task_id,
