@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reviewer Dashboard</title>
+    <link rel="icon" href="/static/mercor.ico" />
+    <link rel="stylesheet" href="/static/styles.css?v=20240336" />
+    <script src="/config.js"></script>
+  </head>
+  <body>
+    <div class="bg-orb bg-orb--one" aria-hidden="true"></div>
+    <div class="bg-orb bg-orb--two" aria-hidden="true"></div>
+    <main class="page">
+      <header class="hero">
+        <p class="eyebrow">Reviewer View</p>
+        <h1>Reviewer Dashboard</h1>
+        <p class="subtitle">
+          Track reviewer approvals per day and all-time totals. Times shown in PST.
+        </p>
+        <div class="meta">
+          <span id="reviewerGeneratedAt">Updated: —</span>
+          <span id="reviewerCount">Reviewers: —</span>
+        </div>
+        <div class="hero-actions hero-actions--balanced">
+          <div class="hero-actions__left">
+            <a class="btn-ghost" href="/">Tasks</a>
+            <a class="btn-ghost" href="/funnel">Funnel Tracking</a>
+            <a class="btn-ghost" href="/authors">Authors</a>
+            <a class="btn-ghost btn-ghost--active" href="/reviewers">Reviewers</a>
+          </div>
+          <div class="hero-actions__right">
+            <button class="btn-ghost" id="logoutBtn" type="button">Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="table-panel">
+        <div class="table-header">
+          <h2>Last 7 Days Approvals</h2>
+          <span id="reviewerL7Count">— total</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Date (PST)</th>
+                <th>Approvals</th>
+              </tr>
+            </thead>
+            <tbody id="reviewerL7Body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="table-panel">
+        <div class="table-header">
+          <h2>Reviewer Approvals</h2>
+          <span id="reviewerSummaryCount">— reviewers</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Reviewer</th>
+                <th>Approved Today (PST)</th>
+                <th>Approved All Time</th>
+                <th>Latest Approval (PST)</th>
+              </tr>
+            </thead>
+            <tbody id="reviewerSummaryBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" id="reviewerDetail" hidden>
+        <div class="table-header">
+          <div>
+            <p class="eyebrow" id="reviewerDetailTitle">Reviewer</p>
+            <h2 id="reviewerDetailName">—</h2>
+          </div>
+          <span id="reviewerDetailTotal">— approvals</span>
+        </div>
+        <div class="controls">
+          <label class="control">
+            <span>Approvals on Date (PST)</span>
+            <input id="reviewerDate" type="date" />
+          </label>
+        </div>
+        <div class="table-header">
+          <h3>Approvals by Day</h3>
+          <span id="reviewerDayCount">— days</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Date (PST)</th>
+                <th>Approvals</th>
+              </tr>
+            </thead>
+            <tbody id="reviewerByDayBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="table-panel" id="reviewerSelectedPanel" hidden>
+        <div class="table-header">
+          <div>
+            <h2 id="reviewerSelectedTitle">Approvals on —</h2>
+            <div class="table-subtitle" id="reviewerSelectedCount">— approvals</div>
+          </div>
+          <div class="table-actions">
+            <span id="reviewerSelectedVisibleCount">Showing —</span>
+            <label class="control compact">
+              <span>Rows</span>
+              <select id="reviewerSelectedPageSize">
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+              </select>
+            </label>
+            <button class="btn-ghost btn-ghost--compact" id="reviewerSelectedToggle" type="button">
+              Show list
+            </button>
+          </div>
+        </div>
+        <div class="table-scroll" id="reviewerSelectedTableWrap" hidden>
+          <table>
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Author</th>
+                <th>Reviewer</th>
+                <th>Approved At (PST)</th>
+              </tr>
+            </thead>
+            <tbody id="reviewerSelectedBody"></tbody>
+          </table>
+        </div>
+        <div class="pager" id="reviewerSelectedPager" hidden>
+          <button id="reviewerSelectedPrev" type="button">Previous</button>
+          <span id="reviewerSelectedPageInfo">Page —</span>
+          <button id="reviewerSelectedNext" type="button">Next</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/static/js/auth.js?v=20240336"></script>
+    <script src="/static/js/reviewers.js?v=20240336"></script>
+  </body>
+</html>

@@ -13,7 +13,7 @@
     <div class="bg-orb bg-orb--two" aria-hidden="true"></div>
     <main class="page">
       <header class="hero">
-        <p class="eyebrow">World Snapshot</p>
+        <p class="eyebrow">Epsilon Real Data Snapshot</p>
         <h1>Mercor Tasks</h1>
         <p class="subtitle">
           Real-time view of status, ownership, and updates pulled from the
@@ -21,12 +21,13 @@
         </p>
         <div class="meta">
           <span id="generatedAt">Updated: —</span>
-          <span id="rowCount">Rows: —</span>
         </div>
         <div class="hero-actions hero-actions--balanced">
           <div class="hero-actions__left">
+            <a class="btn-ghost btn-ghost--active" href="/">Tasks</a>
             <a class="btn-ghost" href="/funnel">Funnel Tracking</a>
             <a class="btn-ghost" href="/authors">Authors</a>
+            <a class="btn-ghost" href="/reviewers">Reviewers</a>
           </div>
           <div class="hero-actions__right">
             <button class="btn-primary" id="exportCsv" type="button">Export CSV</button>
@@ -79,9 +80,6 @@
                 <th data-key="task_name">Task</th>
                 <th data-key="status_name">Status</th>
                 <th data-key="owned_by_user_name">Author</th>
-                <th data-key="verifier_count">Verifier</th>
-                <th data-key="final_score">Score</th>
-                <th data-key="has_gt_grade">GT</th>
                 <th data-key="updated_at">Updated</th>
                 <th data-key="task_id">ID</th>
               </tr>

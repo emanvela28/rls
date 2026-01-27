@@ -1,0 +1,323 @@
+[
+  {
+    "task_id": "task_0007e489fa114727b0b79ca7a25ea7ef",
+    "world_id": "world_2cb0dbfca8494125bc1b71f0f3472a76",
+    "task_name": "Renal-cyst_CT_Abdomen_1541",
+    "task_status_id": "51761042-8491-4ee7-8227-c1acea7cf78b",
+    "version": 18,
+    "created_at": "2026-01-18T06:22:13.638441Z",
+    "updated_at": "2026-01-24T00:29:16.741169Z",
+    "created_by_user_name": "Saatvik Nagpal",
+    "updated_by_user_name": "Kuan-Jung C",
+    "owned_by_user_name": "",
+    "generated_from_task_id": null,
+    "generated_from_task_name": null,
+    "task_status_defn": {
+      "status_id": "51761042-8491-4ee7-8227-c1acea7cf78b",
+      "status_name": "QA Awaiting Review",
+      "action_theme": "#180ead",
+      "qualifies_done": false
+    },
+    "task_latest_edge": {
+      "edge_id": "8e1b5b06-9d57-4826-a72a-6e7468f5de1e",
+      "from_status_ids": [
+        "37f128c9-5f1f-4f53-89ac-252a6ce33242"
+      ],
+      "to_status_id": "51761042-8491-4ee7-8227-c1acea7cf78b",
+      "to_status_name_override": null,
+      "to_owned_by": null,
+      "to_owned_by_status_id": null,
+      "transition_name": "Return to QA Queue",
+      "action_theme": null,
+      "action_theme_icon": null,
+      "actor_roles": [
+        "campaign_annotator"
+      ],
+      "actor_subrole_ids": [
+        "subrole_preset_reviewer"
+      ],
+      "and_actor_owns_required": true,
+      "and_actor_not_owns_required": false,
+      "and_actor_created_required": false,
+      "and_actor_not_created_required": false,
+      "and_actor_previously_owned_required": false,
+      "and_client_feedback": false,
+      "and_client_confirm": false,
+      "and_client_validate_required_fields": false,
+      "ui_annotator_primary": false,
+      "weight": 0.0
+    },
+    "verifier_count": 0,
+    "final_score": null,
+    "final_orchestrator_llm_provider": null,
+    "final_orchestrator_llm_model": null,
+    "approved_at": "2026-01-21T22:07:28.658118Z",
+    "has_gt_grade": false,
+    "trajectories_summary": null,
+    "custom_fields": {
+      "task_rating": 3,
+      "field_4e36a47c160a4a468d4720a6f4649859": "Technique: Multiple computed tomographic images of the abdomen and pelvis are presented for evaluation. Non-contrast axial, coronal and sagittal images are obtained.\n\nFindings:\nSections through the lower lung fields show no pleuro-parenchymal abnormalities. Sections through the liver, spleen, pancreas and the adrenal glands appear normal in size and shape without focal abnormalities. Patient is status post cholecystectomy.\n\nThe kidneys appear normal in size. Simple appearing renal cysts are seen in both kidneys. The right kidney shows a 1.9 cm cyst in the upper pole and a 2.5 cm cyst in the lower pole. The left kidney shows a 5.7 cyst in the upper pole and two cysts in the lower pole; one measuring 1.5 cm in diameter and the second measuring 2.4 cm. \n\nA  5 mm non-obstructing calculus is seen in the cortex of the lower pole of right kidney. A vascular renal calcification is seen in the hilum of the right kidney, lower pole. A 12 mm non-obstructive calculus is seen in the lower pole of the left kidney.\n\nThere are mild atherosclerotic changes seen in the lower abdominal aorta.  Several phleboliths are seen in the lower pelvis. The prostate gland is prominent in size measuring 3.8 x 4.8 x 5.0 cm. The enlarged prostate gland mildly displaces the base of the bladder.  The visualized bony structures appear unremarkable.\n\nIMPRESSION:\n1. Bilateral simple appearing renal cysts as described above.  A Renal CT with Contrast is recommend for further evaluation, if clinically indicated.\n2. Bilateral non-obstructed renal calcifications as described above.\n3. Enlarged prostate gland ( 3.8 x 4.8 x 5.0 cm) mildly displacing the base of the bladder.\n4. The patient is status post cholecystectomy.\n5. Several small phleboliths are seen in the lower pelvis.\n6. Mild atherosclerotic changes are seen in the lower abdominal aorta.\n",
+      "field_51c2e6b3d6594b4aa93efcec4dd9a3f9": "Renal cyst, Urolithiasis",
+      "field_897068be526f4987bf05289c29e05cab": "Kevin Weber",
+      "field_97c789b2cbfa4233b53c55176a9e0404": [
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_026796905f114cbaa43e3d6a06fff3c2_20260121_215145_study__view01_slice041_W400C40.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_48df580d121143a8ba5065025a2d78c9_20260121_215154_study__view02_slice099_W400C40.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_87f044d349fc421cab0e5d68e839b97a_20260121_215155_study__view03_slice051_W400C40.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_b9141586dce0492095e633f457a7a0ca_20260121_215155_study__view04_slice069_W400C40.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_82008eb526ad410ea66b11030ab62900_20260121_215156_study__view05_slice061_W400C40.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_a56e11986bf74f5d9ca15a3255c43219_20260121_215157_study__view06_slice057_W400C40.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_bb9e1502516e400d9bf52e5614d199cd_20260121_215158_study__view07_slice086_W400C40.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_54338ab09b0447fd9fda191d336827fa_20260121_215158_study__view08_slice071_W400C40.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_2f993e073ebc49889f8d021bcdd450a5_20260121_215159_study__view09_slice078_W400C40.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_b6930f0cd4504e41a770fd1d62724bd6_20260121_215200_study__view10_slice077_W400C40.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_1fbf5a82c26043a797d852d296eeb564_20260121_215200_study__view11_slice151_W400C40.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_fb2cf4748d9d4749a9c0e02c5d82a068_20260121_215205_study__view12_slice066_W400C40.png"
+      ],
+      "field_9f7027e088a5437bafdbc5608ff6caa1": "Abdomen",
+      "field_d2ec00282f754e9cb72eefa6ebf3c719": "Renal cysts, prostatomegaly, nephrolithiasis",
+      "field_dcd63c7ad03e48f7b44c70da0d8715cf": "https://merco-orthanc-web.fly.dev/?study=e510f565-c4689803-7236acf7-d81e79cc-c0ed51ff&task_id=task_0007e489fa114727b0b79ca7a25ea7ef",
+      "field_ebd818d2e17e41cebdd7d073b89ed3ad": "CT",
+      "field_ef6f5a0e49c44ce0af079112a11a5be1": [
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_b872b171863b4d148c557bb1a68b26a4_e510f565-c4689803-7236acf7-d81e79cc-c0ed51ff_dicom.zip"
+      ],
+      "field_f149502069bd4fde84cc33a35373fd83": "Ronald Bailey"
+    }
+  },
+  {
+    "task_id": "task_0027e496f82a4a8a813e829dcfd462f6",
+    "world_id": "world_2cb0dbfca8494125bc1b71f0f3472a76",
+    "task_name": "Emphysema_CT_Lumbar-Spine_696",
+    "task_status_id": "ce5f656b-6b79-4913-b0ba-37df93dc9eb1",
+    "version": 24,
+    "created_at": "2026-01-18T06:11:56.959818Z",
+    "updated_at": "2026-01-23T01:07:01.969102Z",
+    "created_by_user_name": "Saatvik Nagpal",
+    "updated_by_user_name": "Colin McCarthy",
+    "owned_by_user_name": "",
+    "generated_from_task_id": null,
+    "generated_from_task_name": null,
+    "task_status_defn": {
+      "status_id": "ce5f656b-6b79-4913-b0ba-37df93dc9eb1",
+      "status_name": "Approved",
+      "action_theme": "#108d51",
+      "qualifies_done": true
+    },
+    "task_latest_edge": {
+      "edge_id": "8975776a-3c9e-455e-a3ae-16d98c0445ef",
+      "from_status_ids": [
+        "301e0a61-5db2-4d1e-bd7f-340419b3cfa7"
+      ],
+      "to_status_id": "ce5f656b-6b79-4913-b0ba-37df93dc9eb1",
+      "to_status_name_override": null,
+      "to_owned_by": null,
+      "to_owned_by_status_id": null,
+      "transition_name": "Approve",
+      "action_theme": "#166534",
+      "action_theme_icon": "circle-check",
+      "actor_roles": [
+        "campaign_annotator"
+      ],
+      "actor_subrole_ids": [
+        "subrole_preset_reviewer"
+      ],
+      "and_actor_owns_required": true,
+      "and_actor_not_owns_required": false,
+      "and_actor_created_required": false,
+      "and_actor_not_created_required": false,
+      "and_actor_previously_owned_required": false,
+      "and_client_feedback": true,
+      "and_client_confirm": true,
+      "and_client_validate_required_fields": false,
+      "ui_annotator_primary": false,
+      "weight": 1.0
+    },
+    "verifier_count": 0,
+    "final_score": null,
+    "final_orchestrator_llm_provider": null,
+    "final_orchestrator_llm_model": null,
+    "approved_at": "2026-01-23T01:07:01.969102Z",
+    "has_gt_grade": false,
+    "trajectories_summary": null,
+    "custom_fields": {
+      "field_4e36a47c160a4a468d4720a6f4649859": "TECHNIQUE: \nHelical acquisition of CT data from the body of T10 through the sacrum. Sagittal and coronal reformations.\n\nFINDINGS:\nThe most caudal well-formed disc space is L5-S1. There are 5 non-rib bearing lumbar spine .\n\nExaggerated lordotic curvature of the lumbar spine with grade 1 anterolisthesis at L4-5 without any evidence for pars defect. There is mild superior endplate deformity with small Schmorl's node at superior endplate of T12 and T11-T12 intervertebral disc space. Partially imaged bridging right anterolateral osteophytes along the lower thoracic spine There is marked endplate sclerosis and L4-5 and to a lesser degree along the posterior endplate of L5-S1 diffuse calcific atherosclerosis of the abdominal aorta with mild ectasia of the suprarenal abdominal aorta measuring up to 20 mm. The retroperitoneal structures are within normal limit . Degenerative changes of the bilateral SI joints with vacuum phenomenon and osteophytosis but with preserved joint spaces. There is suspicion for cortical step-off in the right sacral ala of S1, suspicious for incomplete fracture. Degenerative changes in the pubic symphysis joint. Moderate diverticulosis of the sigmoid colon desiccated mild burden of stool material identified in the rectum\nPartially imaged lower hemithorax exhibits multiple peripheral emphysema/air cysts, mild reticulation and  bronchial wall thickening. \n\nT12-L1: No spinal canal or neural foraminal stenosis.\n\nL1-L2: Mild facet arthropathy. Mild disc bulge. Minimal spinal canal narrowing. Mild bilateral neural foraminal stenosis.\n\nL2-L3: Mild disc bulge and mild facet arthropathy with ligamentum flavum thickening. Minimal spinal canal narrowing and mild bilateral neural foraminal stenosis.\n\nL3-L4: Mild disc bulge and moderate bilateral facet arthropathy with ligamentum flavum thickening. Mild spinal canal stenosis and moderate bilateral neural foraminal stenosis.\n\nL4-L5: Moderate to severe bilateral facet arthropathy. Moderate to severe disc/osteophyte complex with vacuum phenomenon tracking into posterior aspect of the mid L5 vertebral body level, which may suggest extruded disc material. Ligamentum flavum thickening. At least moderate spinal canal stenosis attributable to ligamentum flavum thickening and dorsal osseous ridging of the posterior-superior corner of L5. Moderate to severe bilateral neural foraminal stenosis\n\nL5-S1: Disc vacuum phenomenon. Moderate disc/osteophyte complex and moderate bilateral facet arthropathy. Ligamentum flavum thickening. No spinal canal stenosis. Moderate to severe bilateral neural foraminal stenosis\n\nIMPRESSION:\n 1) Multilevel degenerative lumbar spondylosis, most pronounced at L4-5 with grade 1 anterolisthesis, at least moderate spinal canal stenosis, and moderate to severe bilateral neural foraminal stenosis.\n 2) Suspected extruded disc material at L4-5 with associated vacuum phenomenon extending posteriorly into the L5 vertebral body.\n 3) Moderate to severe bilateral neural foraminal stenosis at L5-S1 without significant central canal stenosis.\n 4) Mild spinal canal stenosis at L3-4 with moderate bilateral neural foraminal stenosis.\n 5) Suspicion for incomplete fracture of the right sacral ala at S1; correlate with focal tenderness and consider further evaluation with MRI if clinically indicated.\n 6) Degenerative changes of the bilateral sacroiliac joints and pubic symphysis.\n 7) Incidental findings include mild suprarenal abdominal aortic ectasia (up to 20 mm), sigmoid diverticulosis, and partially imaged chronic interstitial lung changes and air cysts/emphsyema in the lower hemithorax.\n",
+      "field_51c2e6b3d6594b4aa93efcec4dd9a3f9": "Emphysema",
+      "field_897068be526f4987bf05289c29e05cab": "Colin McCarthy",
+      "field_97c789b2cbfa4233b53c55176a9e0404": [
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_73530331ab6249e283e9b72c57223280_20260122_100122_study__view01_slice093_W1802C1473.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_ff4a990851c14eccbc1f1dfea68234b1_20260122_100122_study__view02_slice016_W1264C1384.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_9e2802ea542d4b9fb8654dbe4d2c85e4_20260122_100122_study__view03_slice019_W1264C1384.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_4d07cb7dd2084828aba64c9649c122ae_20260122_100122_study__view04_slice022_W1264C1384.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_b66b56ff4a124126baf32967f7d8e816_20260122_100123_study__view05_slice016_W1264C1384.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_e3d8c9c73dd140ebbf80e7c634582d7d_20260122_100123_study__view06_slice014_W1264C1384.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_d13502d18081459a8deb38042a0e1701_20260122_100123_study__view07_slice088_W853C1141.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_fef8f2c24d104ad2b684368b3a11b0f2_20260122_100123_study__view08_slice079_W853C1141.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_f36df903c1d242b3bfad815b9d4c575f_20260122_100123_study__view09_slice068_W853C1141.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_1af5c1885d2a4beeb1187efdb9829294_20260122_100123_study__view10_slice057_W853C1141.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_1a27452635ef4d76b3e820d08a15b62f_20260122_100123_study__view11_slice002_W2000C500.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_c9cb0219cb694d5597d6a703fde3510f_20260122_100123_study__view12_slice000_W2000C500.png"
+      ],
+      "field_9f7027e088a5437bafdbc5608ff6caa1": "Lumbar-Spine",
+      "field_dcd63c7ad03e48f7b44c70da0d8715cf": "https://merco-orthanc-web.fly.dev/?study=fbe01228-f08d7c62-52c53299-01662bc7-9176c553&task_id=task_0027e496f82a4a8a813e829dcfd462f6",
+      "field_ebd818d2e17e41cebdd7d073b89ed3ad": "CT",
+      "field_ef6f5a0e49c44ce0af079112a11a5be1": [
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_f8c8ad747f9e43f4b0f3f092dc301c6e_fbe01228-f08d7c62-52c53299-01662bc7-9176c553_dicom.zip"
+      ],
+      "field_f149502069bd4fde84cc33a35373fd83": "contractor d1f023"
+    }
+  },
+  {
+    "task_id": "task_005bfca7371a466c9b63798b4f48ccbe",
+    "world_id": "world_2cb0dbfca8494125bc1b71f0f3472a76",
+    "task_name": "Emphysema_CT_Thyroid_697",
+    "task_status_id": "ce5f656b-6b79-4913-b0ba-37df93dc9eb1",
+    "version": 10,
+    "created_at": "2026-01-18T06:11:57.649186Z",
+    "updated_at": "2026-01-21T21:16:18.403673Z",
+    "created_by_user_name": "Saatvik Nagpal",
+    "updated_by_user_name": "Colin McCarthy",
+    "owned_by_user_name": "",
+    "generated_from_task_id": null,
+    "generated_from_task_name": null,
+    "task_status_defn": {
+      "status_id": "ce5f656b-6b79-4913-b0ba-37df93dc9eb1",
+      "status_name": "Approved",
+      "action_theme": "#108d51",
+      "qualifies_done": true
+    },
+    "task_latest_edge": {
+      "edge_id": "8975776a-3c9e-455e-a3ae-16d98c0445ef",
+      "from_status_ids": [
+        "301e0a61-5db2-4d1e-bd7f-340419b3cfa7"
+      ],
+      "to_status_id": "ce5f656b-6b79-4913-b0ba-37df93dc9eb1",
+      "to_status_name_override": null,
+      "to_owned_by": null,
+      "to_owned_by_status_id": null,
+      "transition_name": "Approve",
+      "action_theme": "#166534",
+      "action_theme_icon": "circle-check",
+      "actor_roles": [
+        "campaign_annotator"
+      ],
+      "actor_subrole_ids": [
+        "subrole_preset_reviewer"
+      ],
+      "and_actor_owns_required": true,
+      "and_actor_not_owns_required": false,
+      "and_actor_created_required": false,
+      "and_actor_not_created_required": false,
+      "and_actor_previously_owned_required": false,
+      "and_client_feedback": true,
+      "and_client_confirm": true,
+      "and_client_validate_required_fields": false,
+      "ui_annotator_primary": false,
+      "weight": 1.0
+    },
+    "verifier_count": 0,
+    "final_score": null,
+    "final_orchestrator_llm_provider": null,
+    "final_orchestrator_llm_model": null,
+    "approved_at": "2026-01-21T21:16:18.403673Z",
+    "has_gt_grade": false,
+    "trajectories_summary": null,
+    "custom_fields": {
+      "field_4e36a47c160a4a468d4720a6f4649859": "TECHNIQUE:\nMultidetector CT images of the chest were obtained without intravenous contrast. Multiplanar reformats and MIP imaging submitted.\n\nFINDINGS:\nNormal thyroid gland.\n\nMild emphysema.\n\nBandlike atelectasis in the right middle lobe and lingula.\n\nIMPRESSION:\n1. No acute cardiopulmonary process.\n2. Mild emphysema.\n3. No concerning pulmonary lesions.",
+      "field_51c2e6b3d6594b4aa93efcec4dd9a3f9": "Emphysema",
+      "field_897068be526f4987bf05289c29e05cab": "Colin McCarthy",
+      "field_97c789b2cbfa4233b53c55176a9e0404": [
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_af6f3675c154489f828ff70f1f330cfa_20260121_210056_study__view01_slice027_W1500C-600.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_5042211442554c4cb8abe92f9861da90_20260121_210056_study__view02_slice067_W1500C-600.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_71c89710b659413fae2491b55a02c16c_20260121_210106_study__view03_slice018_W350C50.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_7f4f9848dedd4ff996c637179579a8c7_20260121_210107_study__view04_slice081_W1500C-600.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_7c94af57368b48639b4814dfed1bb6c4_20260121_210108_study__view05_slice102_W1500C-600.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_d1e2513e075f43388a139ace43b5dc8e_20260121_210109_study__view06_slice054_W1500C-600.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_9d75e87bc11d4adc83fb79a00cbaba44_20260121_210109_study__view07_slice093_W1500C-600.png"
+      ],
+      "field_9f7027e088a5437bafdbc5608ff6caa1": "Thyroid",
+      "field_d2ec00282f754e9cb72eefa6ebf3c719": "Emphysema, atelectasis",
+      "field_dcd63c7ad03e48f7b44c70da0d8715cf": "https://merco-orthanc-web.fly.dev/?study=68a64a8a-adbdd44d-79405578-2bfa2496-cf813c4d&task_id=task_005bfca7371a466c9b63798b4f48ccbe",
+      "field_ebd818d2e17e41cebdd7d073b89ed3ad": "CT",
+      "field_ef6f5a0e49c44ce0af079112a11a5be1": [
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_4bc3f64c9550407b8fcfc1e40573d408_68a64a8a-adbdd44d-79405578-2bfa2496-cf813c4d_dicom.zip"
+      ],
+      "field_f149502069bd4fde84cc33a35373fd83": "M B"
+    }
+  },
+  {
+    "task_id": "task_0068933e95f8463e9785d6390c1c0704",
+    "world_id": "world_2cb0dbfca8494125bc1b71f0f3472a76",
+    "task_name": "Uterine-fibroids_MR_Others_1303",
+    "task_status_id": "ce5f656b-6b79-4913-b0ba-37df93dc9eb1",
+    "version": 6,
+    "created_at": "2026-01-18T06:19:17.033727Z",
+    "updated_at": "2026-01-21T05:33:39.898258Z",
+    "created_by_user_name": "Saatvik Nagpal",
+    "updated_by_user_name": "Jimmy Zhang",
+    "owned_by_user_name": "",
+    "generated_from_task_id": null,
+    "generated_from_task_name": null,
+    "task_status_defn": {
+      "status_id": "ce5f656b-6b79-4913-b0ba-37df93dc9eb1",
+      "status_name": "Approved",
+      "action_theme": "#108d51",
+      "qualifies_done": true
+    },
+    "task_latest_edge": {
+      "edge_id": "8975776a-3c9e-455e-a3ae-16d98c0445ef",
+      "from_status_ids": [
+        "301e0a61-5db2-4d1e-bd7f-340419b3cfa7"
+      ],
+      "to_status_id": "ce5f656b-6b79-4913-b0ba-37df93dc9eb1",
+      "to_status_name_override": null,
+      "to_owned_by": null,
+      "to_owned_by_status_id": null,
+      "transition_name": "Approve",
+      "action_theme": "#166534",
+      "action_theme_icon": "circle-check",
+      "actor_roles": [
+        "campaign_annotator"
+      ],
+      "actor_subrole_ids": [
+        "subrole_preset_reviewer"
+      ],
+      "and_actor_owns_required": true,
+      "and_actor_not_owns_required": false,
+      "and_actor_created_required": false,
+      "and_actor_not_created_required": false,
+      "and_actor_previously_owned_required": false,
+      "and_client_feedback": true,
+      "and_client_confirm": true,
+      "and_client_validate_required_fields": false,
+      "ui_annotator_primary": false,
+      "weight": 1.0
+    },
+    "verifier_count": 0,
+    "final_score": null,
+    "final_orchestrator_llm_provider": null,
+    "final_orchestrator_llm_model": null,
+    "approved_at": "2026-01-21T05:33:39.898258Z",
+    "has_gt_grade": false,
+    "trajectories_summary": null,
+    "custom_fields": {
+      "field_4e36a47c160a4a468d4720a6f4649859": "TECHNIQUE:\nMRI of the pelvis with and without IV contrast.\n\nFINDINGS:\n3.3 cm T2-hypointense well-defined round intramural fibroid at the uterine fundus. There is mild distortion of the underlying endometrial cavity, which appears otherwise normal. Subcentimeter physiological follicles in the right ovary.  Left ovary unremarkable.  Normal appearance of the urinary bladder.  Visualized lower lumbar spine and sacrum appear normal on the available images.\n\nIMPRESSION:\nIntramural fibroid in the uterine fundus measuring approximately 3.3 cm. ",
+      "field_51c2e6b3d6594b4aa93efcec4dd9a3f9": "Uterine fibroids",
+      "field_97c789b2cbfa4233b53c55176a9e0404": [
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_9a4ad6a879404f988da7ccc2dc940cea_20260118_232927_study__view01_slice004_W1334C667.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_87d164f5660543ec839d2a3c1ce12d17_20260118_232927_study__view02_slice000_W1334C667.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_ade118de234546bb8b8dddf9aae93b01_20260118_232927_study__view03_slice003_W1334C667.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_67de8e70ac234dbdb0c32c26049781d8_20260118_232927_study__view04_slice005_W1334C667.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_4b6812ac12444506b7e77e414cbf75f5_20260118_232927_study__view05_slice008_W1334C667.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_83d08616cc534c8c86c97c031e62c7d2_20260118_232927_study__view06_slice000_W1334C667.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_9ace68650541427e91d915d75167b153_20260118_232928_study__view07_slice004_W1334C667.png",
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_722626ab416448d2aeba6a1260806251_20260118_232928_study__view08_slice002_W1334C667.png"
+      ],
+      "field_9f7027e088a5437bafdbc5608ff6caa1": "Others",
+      "field_dcd63c7ad03e48f7b44c70da0d8715cf": "https://merco-orthanc-web.fly.dev/?study=9d38ae22-b8adf440-0cb97963-e130420d-677fbb5a&task_id=task_0068933e95f8463e9785d6390c1c0704",
+      "field_ebd818d2e17e41cebdd7d073b89ed3ad": "MR",
+      "field_ef6f5a0e49c44ce0af079112a11a5be1": [
+        "s3://rl-studio-snapshots-prod/files/camp_cb2df404814248278aa53ea7c8052364/file_22d82b4461a94e6a8db77bffcfb5c544_9d38ae22-b8adf440-0cb97963-e130420d-677fbb5a_dicom.zip"
+      ],
+      "field_f149502069bd4fde84cc33a35373fd83": "Colin McCarthy"
+    }
+  }
+]

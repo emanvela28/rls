@@ -1,6 +1,7 @@
 import csv
 import json
 import os
+import sqlite3
 import sys
 import threading
 import time
@@ -17,6 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 PUBLIC_DIR = BASE_DIR / "public"
 DATA_DIR = BASE_DIR / "data"
 SRC_DIR = BASE_DIR / "src"
+DB_FILE = DATA_DIR / "tasks.db"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
@@ -32,6 +34,11 @@ SCRAPE_INTERVAL_SECONDS = 180
 SCRAPE_STATE = {"running": False, "last_run": 0.0, "last_error": ""}
 SCRAPE_LOCK = threading.Lock()
 EMAIL_MAP_CACHE = {"mtime": 0.0, "data": {}}
+ROLES_CACHE = {"mtime": 0.0, "data": []}
+OLD_NEW_CACHE = {"mtime": 0.0, "data": {}}
+NO_RLS_CACHE = {"mtime": 0.0, "data": {"names": set(), "emails": set(), "people": []}}
+OLD_NEW_PEOPLE_CACHE = {"mtime": 0.0, "data": []}
+NAME_EMAIL_CACHE = {"mtime": 0.0, "data": {}}
 OVERRIDE_BY_EMAIL = {
     "g748044d6fa8c271@c-mercor.com": {"name": "HAMILTON ADRIAN", "email": "g748044d6fa8c271@c-mercor.com"},
     "p92f5194510e036b@c-mercor.com": {"name": "Brian D'Amore", "email": "p92f5194510e036b@c-mercor.com"},
@@ -39,8 +46,11 @@ OVERRIDE_BY_EMAIL = {
     "ob65449bcf28bea1@c-mercor.com": {"name": "Muhammad Hossain", "email": "ob65449bcf28bea1@c-mercor.com"},
     "g58b2d103e8b0a86@c-mercor.com": {"name": "Brandon Evans", "email": "g58b2d103e8b0a86@c-mercor.com"},
     "d1f02345a5a0400d@c-mercor.com": {"name": "Wooil Kim", "email": "d1f02345a5a0400d@c-mercor.com"},
+    "erich.nicholai@gmail.com": {"name": "Erich Mussak, MD", "email": "medical61@c-mercor.com"},
+    "matthew.a.haber@gmail.com": {"name": "Matthew Haber", "email": "c1093c720d7223b4@c-mercor.com"},
 }
 OVERRIDE_BY_NAME = {
+    "contractor c1093c": {"name": "Matthew Haber", "email": "c1093c720d7223b4@c-mercor.com"},
     "contractor d1f023": {"name": "Wooil Kim", "email": "d1f02345a5a0400d@c-mercor.com"},
     "contractor p92f51": {"name": "Brian D'Amore", "email": "p92f5194510e036b@c-mercor.com"},
     "contractor hd5c2b": {"name": "Howard Yan", "email": "hd5c2be12ae2aca6@c-mercor.com"},
@@ -48,6 +58,9 @@ OVERRIDE_BY_NAME = {
     "contractor ob6544": {"name": "Muhammad Hossain", "email": "ob65449bcf28bea1@c-mercor.com"},
     "contractor g58b2d": {"name": "Brandon Evans", "email": "g58b2d103e8b0a86@c-mercor.com"},
     "hamilton adrian": {"name": "HAMILTON ADRIAN", "email": "g748044d6fa8c271@c-mercor.com"},
+    "m b": {"name": "Erich Mussak, MD", "email": "medical61@c-mercor.com"},
+    "erich mussak, md": {"name": "Erich Mussak, MD", "email": "medical61@c-mercor.com"},
+    "matthew haber": {"name": "Matthew Haber", "email": "c1093c720d7223b4@c-mercor.com"},
 }
 
 
@@ -78,6 +91,25 @@ def get_email_domain(email: str) -> str:
     if not email or "@" not in email:
         return ""
     return email.split("@", 1)[1].lower()
+
+
+def normalize_name(value: str) -> str:
+    if not value:
+        return ""
+    return " ".join(value.lower().split())
+
+
+def normalize_name_loose(value: str) -> str:
+    if not value:
+        return ""
+    lowered = value.lower()
+    cleaned = "".join(ch if ch.isalnum() or ch.isspace() else " " for ch in lowered)
+    parts = [part for part in cleaned.split() if part]
+    if parts and parts[-1] in {"dr", "md"}:
+        parts = parts[:-1]
+    if parts and parts[0] == "steve":
+        parts[0] = "stephen"
+    return " ".join(parts)
 
 
 def verify_token(
@@ -213,6 +245,218 @@ def load_email_map() -> dict:
     return mapping
 
 
+def load_name_email_map() -> dict:
+    """Load normalized name -> preferred email mapping from data/emails.csv."""
+    csv_path = DATA_DIR / "emails.csv"
+    if not csv_path.exists():
+        return {}
+    mtime = csv_path.stat().st_mtime
+    if NAME_EMAIL_CACHE["mtime"] == mtime and NAME_EMAIL_CACHE["data"]:
+        return NAME_EMAIL_CACHE["data"]
+
+    mapping = {}
+    try:
+        with csv_path.open(newline="", encoding="utf-8") as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                raw_name = row.get("Name") or ""
+                name = normalize_name(raw_name)
+                loose = normalize_name_loose(raw_name)
+                email = (row.get("Email") or "").strip().lower()
+                contractor = (row.get("Contractor Email") or "").strip().lower()
+                if not name:
+                    continue
+                preferred = contractor or email
+                if not preferred:
+                    continue
+                mapping[name] = preferred
+                if loose:
+                    mapping.setdefault(loose, preferred)
+                parts = loose.split()
+                if len(parts) >= 2:
+                    first_last = f"{parts[0]} {parts[-1]}"
+                    mapping.setdefault(first_last, preferred)
+                if len(parts) >= 3:
+                    first_middle_last = f"{parts[0]} {parts[1]} {parts[-1]}"
+                    mapping.setdefault(first_middle_last, preferred)
+    except Exception:
+        return {}
+
+    NAME_EMAIL_CACHE["mtime"] = mtime
+    NAME_EMAIL_CACHE["data"] = mapping
+    return mapping
+
+
+def load_roles() -> list:
+    """Load unique role emails from data/roles.csv."""
+    csv_path = DATA_DIR / "roles.csv"
+    if not csv_path.exists():
+        return []
+    mtime = csv_path.stat().st_mtime
+    if ROLES_CACHE["mtime"] == mtime and ROLES_CACHE["data"]:
+        return ROLES_CACHE["data"]
+
+    seen = set()
+    roles = []
+    try:
+        with csv_path.open(newline="", encoding="utf-8") as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                email = (row.get("User Email") or "").strip().lower()
+                if not email or email in seen:
+                    continue
+                seen.add(email)
+                roles.append(email)
+    except Exception:
+        return []
+
+    ROLES_CACHE["mtime"] = mtime
+    ROLES_CACHE["data"] = roles
+    return roles
+
+
+def load_old_new_map() -> dict:
+    """Load normalized name -> status mapping from data/old_new.csv."""
+    csv_path = DATA_DIR / "old_new.csv"
+    if not csv_path.exists():
+        return {}
+    mtime = csv_path.stat().st_mtime
+    if OLD_NEW_CACHE["mtime"] == mtime and OLD_NEW_CACHE["data"]:
+        return OLD_NEW_CACHE["data"]
+
+    mapping = {}
+    try:
+        with csv_path.open(newline="", encoding="utf-8") as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                raw_name = row.get("Name") or ""
+                name = normalize_name(raw_name)
+                status = (row.get("Status") or "").strip()
+                if name and status:
+                    mapping[name] = status
+                    loose = normalize_name_loose(raw_name)
+                    if loose:
+                        mapping.setdefault(loose, status)
+        if "stephen schmitter" in mapping:
+            mapping[normalize_name("steve schmitter")] = mapping["stephen schmitter"]
+            mapping[normalize_name("schmitter")] = mapping["stephen schmitter"]
+        if "summit shah" in mapping:
+            mapping[normalize_name("dr.shah")] = mapping["summit shah"]
+            mapping[normalize_name("dr shah")] = mapping["summit shah"]
+        if "summit shah (dr)" in mapping:
+            mapping[normalize_name("summit shah")] = mapping["summit shah (dr)"]
+            mapping[normalize_name_loose("summit shah (dr)")] = mapping["summit shah (dr)"]
+    except Exception:
+        return {}
+
+    OLD_NEW_CACHE["mtime"] = mtime
+    OLD_NEW_CACHE["data"] = mapping
+    return mapping
+
+
+def load_old_new_people() -> list:
+    """Load people rows from data/old_new.csv, excluding totals."""
+    csv_path = DATA_DIR / "old_new.csv"
+    if not csv_path.exists():
+        return []
+    mtime = csv_path.stat().st_mtime
+    if OLD_NEW_PEOPLE_CACHE["mtime"] == mtime and OLD_NEW_PEOPLE_CACHE["data"]:
+        return OLD_NEW_PEOPLE_CACHE["data"]
+
+    people = []
+    try:
+        with csv_path.open(newline="", encoding="utf-8") as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                raw_name = (row.get("Name") or "").strip()
+                name_key = normalize_name(raw_name)
+                if not raw_name or name_key in {"total", "campaign total"}:
+                    continue
+                status = (row.get("Status") or "").strip()
+                people.append({"name": raw_name, "status": status})
+    except Exception:
+        return []
+
+    OLD_NEW_PEOPLE_CACHE["mtime"] = mtime
+    OLD_NEW_PEOPLE_CACHE["data"] = people
+    return people
+
+
+def load_no_rls_map() -> dict:
+    """Load normalized name/email sets from data/noRLS.csv."""
+    csv_path = DATA_DIR / "noRLS.csv"
+    if not csv_path.exists():
+        return {"names": set(), "emails": set(), "people": []}
+    mtime = csv_path.stat().st_mtime
+    if NO_RLS_CACHE["mtime"] == mtime and NO_RLS_CACHE["data"]:
+        return NO_RLS_CACHE["data"]
+
+    names = set()
+    emails = set()
+    people = []
+    try:
+        with csv_path.open(newline="", encoding="utf-8") as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                name = normalize_name(row.get("Name") or "")
+                email = (row.get("Email") or "").strip().lower()
+                contractor = (row.get("Contractor Email") or "").strip().lower()
+                if name:
+                    names.add(name)
+                if email:
+                    emails.add(email)
+                if contractor:
+                    emails.add(contractor)
+                if name or email or contractor:
+                    people.append(
+                        {
+                            "name": row.get("Name") or "",
+                            "email": email,
+                            "contractor_email": contractor,
+                        }
+                    )
+    except Exception:
+        return {"names": set(), "emails": set(), "people": []}
+
+    NO_RLS_CACHE["mtime"] = mtime
+    NO_RLS_CACHE["data"] = {"names": names, "emails": emails, "people": people}
+    return NO_RLS_CACHE["data"]
+
+
+def load_reviewer_map() -> dict:
+    if not DB_FILE.exists():
+        return {}
+    reviewers = {"names": set(), "emails": set(), "contractor_emails": set()}
+    try:
+        conn = sqlite3.connect(str(DB_FILE))
+        cur = conn.execute(
+            """
+            SELECT name, email, contractor_email
+            FROM authors
+            WHERE position = 'Reviewer'
+            """
+        )
+        for name, email, contractor_email in cur.fetchall():
+            if name:
+                reviewers["names"].add(normalize_name(name))
+            if email:
+                reviewers["emails"].add(email.strip().lower())
+            if contractor_email:
+                reviewers["contractor_emails"].add(contractor_email.strip().lower())
+    except sqlite3.Error:
+        return {}
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+    return {
+        "names": sorted(reviewers["names"]),
+        "emails": sorted(reviewers["emails"]),
+        "contractor_emails": sorted(reviewers["contractor_emails"]),
+    }
+
+
 def apply_name_overrides(tasks: list, email_map: dict) -> list:
     """Normalize author names/emails using emails.csv map and explicit overrides."""
     normalized_map = {k.lower(): v for k, v in (email_map or {}).items()}
@@ -262,6 +506,11 @@ def funnel():
     return FileResponse(PUBLIC_DIR / "funnel.html", headers=NO_CACHE_HEADERS)
 
 
+@app.get("/reviewers")
+def reviewers():
+    return FileResponse(PUBLIC_DIR / "reviewers.html", headers=NO_CACHE_HEADERS)
+
+
 @app.get("/config.js")
 def config_js():
     content = (
@@ -284,12 +533,66 @@ def api_data(payload=Depends(verify_token)):
         raise HTTPException(status_code=503, detail="data.json not available yet.")
     data = json.loads(data_file.read_text(encoding="utf-8"))
     email_map = load_email_map()
+    name_email_map = load_name_email_map()
+    roles = load_roles()
+    old_new_map = load_old_new_map()
+    no_rls_map = load_no_rls_map()
+    reviewer_map = load_reviewer_map()
+    old_new_people = load_old_new_people()
     tasks = data.get("tasks") or []
     if email_map:
         data["email_map"] = email_map
         data["tasks"] = apply_name_overrides(tasks, email_map)
     else:
         data["tasks"] = apply_name_overrides(tasks, {})
+    if roles:
+        data["roles"] = roles
+    if old_new_map:
+        data["old_new_map"] = old_new_map
+    if name_email_map:
+        data["name_email_map"] = name_email_map
+    if reviewer_map:
+        data["reviewer_map"] = reviewer_map
+    role_names = set()
+    role_names_loose = set()
+    if roles and email_map:
+        for email in roles:
+            name = email_map.get(email)
+            if name:
+                role_names.add(normalize_name(name))
+                role_names_loose.add(normalize_name_loose(name))
+
+    extra_no_rls_people = []
+    extra_no_rls_names = set()
+    for person in old_new_people:
+        name_key = normalize_name(person.get("name") or "")
+        loose_key = normalize_name_loose(person.get("name") or "")
+        if not name_key or name_key in role_names or loose_key in role_names_loose:
+            continue
+        if name_key in no_rls_map.get("names", set()):
+            continue
+        extra_no_rls_people.append(
+            {
+                "name": person.get("name") or "",
+                "email": "",
+                "contractor_email": "",
+            }
+        )
+        extra_no_rls_names.add(name_key)
+
+    if no_rls_map and (
+        no_rls_map.get("names")
+        or no_rls_map.get("emails")
+        or no_rls_map.get("people")
+        or extra_no_rls_people
+    ):
+        merged_names = set(no_rls_map.get("names", set()))
+        merged_names.update(extra_no_rls_names)
+        data["no_rls_map"] = {
+            "names": sorted(merged_names),
+            "emails": sorted(no_rls_map.get("emails", set())),
+        }
+        data["no_rls_people"] = no_rls_map.get("people", []) + extra_no_rls_people
     return data
 
 

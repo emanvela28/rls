@@ -22,14 +22,24 @@
           <span id="generatedAt">Updated: —</span>
           <span id="writerTotal">Writers counted: —</span>
         </div>
-        <div class="hero-actions funnel-actions">
-          <a class="btn-ghost" href="/">Back to Tasks</a>
-          <a class="btn-ghost" href="/authors">Authors</a>
-          <button class="btn-ghost" id="logoutBtn" type="button">Logout</button>
+        <div class="hero-actions hero-actions--balanced">
+          <div class="hero-actions__left">
+            <a class="btn-ghost" href="/">Tasks</a>
+            <a class="btn-ghost btn-ghost--active" href="/funnel">Funnel Tracking</a>
+            <a class="btn-ghost" href="/authors">Authors</a>
+            <a class="btn-ghost" href="/reviewers">Reviewers</a>
+          </div>
+          <div class="hero-actions__right">
+            <button class="btn-ghost" id="contributorScoreInfoBtn" type="button">Contributor Score</button>
+            <button class="btn-ghost" id="logoutBtn" type="button">Logout</button>
+          </div>
         </div>
       </header>
 
       <section class="panel">
+        <div class="meta">
+          <span id="onboardedLastUpdated">Onboarded metrics last updated by: —</span>
+        </div>
         <div class="status-block">
           <div class="status-block__label">Statuses counted</div>
           <div class="status-badges">
@@ -40,8 +50,29 @@
             <span class="status-badge status-badge--claimed">Pending</span>
           </div>
         </div>
-        <div class="stats" id="funnelStats"></div>
-        <div class="stats" id="stagePeopleStats"></div>
+        <div class="table-header table-header--metrics">
+          <div>
+            <h2>Funnel Metrics</h2>
+            <div class="table-subtitle">Toggle cohort view and display format.</div>
+          </div>
+          <div class="table-header-actions">
+            <div class="chips" id="metricsCohortToggle"></div>
+            <div class="chips" id="metricsDisplayToggle"></div>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="metrics-table">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th data-metrics-col="total">Total</th>
+                <th data-metrics-col="new">New Writers</th>
+                <th data-metrics-col="old">Old Writers</th>
+              </tr>
+            </thead>
+            <tbody id="metricsTableBody"></tbody>
+          </table>
+        </div>
       </section>
 
       <section class="panel">
@@ -56,7 +87,10 @@
         <div class="table-header">
           <div>
             <p class="eyebrow" id="detailEmail">Email</p>
-            <h2 id="detailName">Author</h2>
+            <div class="detail-title">
+              <h2 id="detailName">Author</h2>
+              <span id="detailBadge" class="history-tags" hidden></span>
+            </div>
           </div>
           <div class="table-header-actions">
             <span id="detailScore">— score</span>
@@ -84,6 +118,10 @@
             <div class="table-subtitle">Click a stage pill to filter.</div>
           </div>
           <div class="table-header-actions">
+            <label class="funnel-search">
+              <span class="sr-only">Search authors</span>
+              <input id="authorSearch" type="search" placeholder="Search names or emails" />
+            </label>
             <div class="chips" id="stageFilterChips"></div>
             <span id="authorProgressCount">— authors</span>
           </div>
@@ -106,6 +144,44 @@
         </div>
       </section>
     </main>
+
+    <div class="modal" id="contributorScoreModal" hidden>
+      <div class="modal__backdrop" data-modal-close></div>
+      <div class="modal__content" role="dialog" aria-modal="true" aria-labelledby="contributorScoreTitle">
+        <button class="modal__close" type="button" data-modal-close aria-label="Close contributor score details">
+          Close
+        </button>
+        <h2 id="contributorScoreTitle">Contributor Score</h2>
+        <div class="modal__body">
+          <p>
+            Purpose: rank authors by how much they advance work, discounting stages they don't control.
+          </p>
+          <h3>Formula (per author)</h3>
+          <ul>
+            <li>Start at 0.</li>
+            <li>
+              For each task, add the weight for its current status:
+              <ul>
+                <li>Approved: +3</li>
+                <li>Awaiting Review: +1.5</li>
+                <li>Pending: +0.5</li>
+              </ul>
+            </li>
+            <li>Statuses like QA / In Review are not weighted (they depend on reviewers, not authors).</li>
+            <li>Final score is the sum across all tasks for that author.</li>
+          </ul>
+          <h3>Usage in UI</h3>
+          <ul>
+            <li>Funnel -> Author Progress table shows a "Contributor Score" column and lets you sort high -> low or low -> high.</li>
+            <li>Sorting by score will prioritize authors with more approvals, then submissions, then claims.</li>
+          </ul>
+          <h3>Notes</h3>
+          <ul>
+            <li>Because QA/In Review are excluded, a long reviewer queue won't inflate a writer's score.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/static/js/auth.js?v=20240336"></script>

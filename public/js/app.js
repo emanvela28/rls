@@ -1,6 +1,5 @@
 const tableBody = document.getElementById("tableBody");
 const generatedAtEl = document.getElementById("generatedAt");
-const rowCountEl = document.getElementById("rowCount");
 const visibleCountEl = document.getElementById("visibleCount");
 const searchInput = document.getElementById("searchInput");
 const statusFilter = document.getElementById("statusFilter");
@@ -19,6 +18,9 @@ let sortDirection = "desc";
 let currentPage = 1;
 let pageSize = Number(pageSizeSelect.value);
 let lastFilteredSorted = [];
+let oldNewMap = {};
+let noRlsMap = { names: new Set(), emails: new Set() };
+let reviewerMap = { names: new Set(), emails: new Set(), contractorEmails: new Set() };
 const OVERRIDE_BY_EMAIL = {
   "g748044d6fa8c271@c-mercor.com": { name: "HAMILTON ADRIAN", email: "g748044d6fa8c271@c-mercor.com" },
   "p92f5194510e036b@c-mercor.com": { name: "Brian D'Amore", email: "p92f5194510e036b@c-mercor.com" },
@@ -26,8 +28,11 @@ const OVERRIDE_BY_EMAIL = {
   "ob65449bcf28bea1@c-mercor.com": { name: "Muhammad Hossain", email: "ob65449bcf28bea1@c-mercor.com" },
   "g58b2d103e8b0a86@c-mercor.com": { name: "Brandon Evans", email: "g58b2d103e8b0a86@c-mercor.com" },
   "d1f02345a5a0400d@c-mercor.com": { name: "Wooil Kim", email: "d1f02345a5a0400d@c-mercor.com" },
+  "erich.nicholai@gmail.com": { name: "Erich Mussak, MD", email: "medical61@c-mercor.com" },
+  "matthew.a.haber@gmail.com": { name: "Matthew Haber", email: "c1093c720d7223b4@c-mercor.com" },
 };
 const OVERRIDE_BY_NAME = {
+  "contractor c1093c": { name: "Matthew Haber", email: "c1093c720d7223b4@c-mercor.com" },
   "contractor d1f023": { name: "Wooil Kim", email: "d1f02345a5a0400d@c-mercor.com" },
   "contractor p92f51": { name: "Brian D'Amore", email: "p92f5194510e036b@c-mercor.com" },
   "contractor hd5c2b": { name: "Howard Yan", email: "hd5c2be12ae2aca6@c-mercor.com" },
@@ -35,9 +40,73 @@ const OVERRIDE_BY_NAME = {
   "contractor ob6544": { name: "Muhammad Hossain", email: "ob65449bcf28bea1@c-mercor.com" },
   "contractor g58b2d": { name: "Brandon Evans", email: "g58b2d103e8b0a86@c-mercor.com" },
   "hamilton adrian": { name: "HAMILTON ADRIAN", email: "g748044d6fa8c271@c-mercor.com" },
+  "m b": { name: "Erich Mussak, MD", email: "medical61@c-mercor.com" },
+  "erich mussak, md": { name: "Erich Mussak, MD", email: "medical61@c-mercor.com" },
+  "matthew haber": { name: "Matthew Haber", email: "c1093c720d7223b4@c-mercor.com" },
 };
 const normalizeEmail = (value) => (value || "").trim().toLowerCase();
-const normalizeName = (value) => (value || "").trim().toLowerCase();
+const normalizeName = (value) => (value || "").trim().toLowerCase().replace(/\s+/g, " ");
+const PST_TIMEZONE = "America/Los_Angeles";
+const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
+  timeZone: PST_TIMEZONE,
+  year: "numeric",
+  month: "short",
+  day: "2-digit",
+  hour: "numeric",
+  minute: "2-digit",
+});
+
+const formatPst = (value) => {
+  if (!value) return "—";
+  const cleaned = value.replace(" UTC", "Z").replace(" ", "T");
+  const dt = new Date(cleaned);
+  if (Number.isNaN(dt.getTime())) return value;
+  return `${dateTimeFormatter.format(dt)} PST`;
+};
+const historyLabel = (name) => {
+  const key = normalizeName(name);
+  return key ? oldNewMap[key] || "" : "";
+};
+const isReviewer = (name, email) => {
+  const nameKey = normalizeName(name);
+  const emailKey = normalizeEmail(email);
+  return (
+    (nameKey && reviewerMap.names.has(nameKey)) ||
+    (emailKey && reviewerMap.emails.has(emailKey)) ||
+    (emailKey && reviewerMap.contractorEmails.has(emailKey))
+  );
+};
+const isNoRls = (name, email) => {
+  const nameKey = normalizeName(name);
+  const emailKey = normalizeEmail(email);
+  return (
+    (nameKey && noRlsMap.names.has(nameKey)) ||
+    (emailKey && noRlsMap.emails.has(emailKey))
+  );
+};
+const isNoRlsEligibleForTask = (name, email, status) => {
+  if (!isNoRls(name, email)) return false;
+  const normalized = (status || "").trim().toLowerCase();
+  return !normalized;
+};
+const historyBadges = (name, email, status) => {
+  const tags = [];
+  const reviewer = isReviewer(name, email);
+  if (reviewer) {
+    tags.push('<span class="history-tag history-tag--reviewer">Reviewer</span>');
+  } else {
+    const label = historyLabel(name);
+    if (label) {
+      const key = normalizeName(label);
+      const className = key === "old" || key === "new" ? ` history-tag--${key}` : "";
+      tags.push(`<span class="history-tag${className}">${label}</span>`);
+    }
+  }
+  if (isNoRlsEligibleForTask(name, email, status)) {
+    tags.push('<span class="history-tag history-tag--no-rls">Not in RLS</span>');
+  }
+  return tags.join("");
+};
 const applyTaskOverrides = (tasks, emailMap = {}) =>
   tasks.map((task) => {
     const normalizedEmail = normalizeEmail(task.owned_by_user_email);
@@ -140,12 +209,7 @@ const renderTable = (tasks) => {
     row.innerHTML = `
       <td>${task.task_name || "—"}</td>
       <td><span class="status-pill">${task.status_name || "Unknown"}</span></td>
-      <td>${task.owned_by_user_name || "—"}</td>
-      <td>${task.verifier_count ?? "—"}</td>
-      <td>${task.final_score ?? "—"}</td>
-      <td class="${task.has_gt_grade ? "gt-true" : "gt-false"}">${
-        task.has_gt_grade ? "Yes" : "No"
-      }</td>
+      <td>${task.owned_by_user_name || "—"}${historyBadges(task.owned_by_user_name, task.owned_by_user_email, task.status_name)}</td>
       <td>${formatDate(task.updated_at)}</td>
       <td>${task.task_id || "—"}</td>
     `;
@@ -219,9 +283,21 @@ const applyFilters = () => {
 window.authFetch("/api/data")
   .then((response) => response.json())
   .then((data) => {
-    generatedAtEl.textContent = `Updated: ${data.generated_at || "—"}`;
-    rowCountEl.textContent = `Rows: ${data.rows_returned || 0}`;
+    generatedAtEl.textContent = `Updated: ${formatPst(data.generated_at)}`;
     const emailMap = data.email_map || {};
+    oldNewMap = {};
+    Object.entries(data.old_new_map || {}).forEach(([key, value]) => {
+      oldNewMap[normalizeName(key)] = value;
+    });
+    noRlsMap = {
+      names: new Set(data.no_rls_map?.names || []),
+      emails: new Set(data.no_rls_map?.emails || []),
+    };
+    reviewerMap = {
+      names: new Set(data.reviewer_map?.names || []),
+      emails: new Set(data.reviewer_map?.emails || []),
+      contractorEmails: new Set(data.reviewer_map?.contractor_emails || []),
+    };
     allTasks = applyTaskOverrides(data.tasks || [], emailMap);
     renderStats(allTasks);
     populateStatusFilter(allTasks);

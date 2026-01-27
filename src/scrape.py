@@ -23,10 +23,13 @@ OUT_CSV = Path("data/data.csv")
 OUT_CHANGELOG_JSON = Path("data/changelog.json")
 OUT_CHANGELOG_CSV = Path("data/changelog.csv")
 OUT_SHEET_STATUS = Path("data/sheet_status.json")
+OUT_TASK_SAMPLE = Path("data/task_sample.json")
 DB_FILE = Path("data/tasks.db")
 EMAILS_CSV = Path("data/emails.csv")
+REVIEWER_CSV = Path("data/reviewer.csv")
 USERS_URL_TEMPLATE = "https://api.studio.mercor.com/users/campaign/{campaign_id}"
 AUTHOR_CUSTOM_FIELD_ID = "field_f149502069bd4fde84cc33a35373fd83"
+CLAIMING_REVIEWER_FIELD_ID = "field_897068be526f4987bf05289c29e05cab"
 SHEET_SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 OVERRIDE_BY_EMAIL = {
     "g748044d6fa8c271@c-mercor.com": {"name": "HAMILTON ADRIAN", "email": "g748044d6fa8c271@c-mercor.com"},
@@ -35,8 +38,11 @@ OVERRIDE_BY_EMAIL = {
     "ob65449bcf28bea1@c-mercor.com": {"name": "Muhammad Hossain", "email": "ob65449bcf28bea1@c-mercor.com"},
     "g58b2d103e8b0a86@c-mercor.com": {"name": "Brandon Evans", "email": "g58b2d103e8b0a86@c-mercor.com"},
     "d1f02345a5a0400d@c-mercor.com": {"name": "Wooil Kim", "email": "d1f02345a5a0400d@c-mercor.com"},
+    "erich.nicholai@gmail.com": {"name": "Erich Mussak, MD", "email": "erich.nicholai@gmail.com"},
+    "matthew.a.haber@gmail.com": {"name": "Matthew Haber", "email": "matthew.a.haber@gmail.com"},
 }
 OVERRIDE_BY_NAME = {
+    "contractor c1093c": {"name": "Matthew Haber", "email": "matthew.a.haber@gmail.com"},
     "contractor d1f023": {"name": "Wooil Kim", "email": "d1f02345a5a0400d@c-mercor.com"},
     "contractor p92f51": {"name": "Brian D'Amore", "email": "p92f5194510e036b@c-mercor.com"},
     "contractor hd5c2b": {"name": "Howard Yan", "email": "hd5c2be12ae2aca6@c-mercor.com"},
@@ -44,6 +50,9 @@ OVERRIDE_BY_NAME = {
     "contractor ob6544": {"name": "Muhammad Hossain", "email": "ob65449bcf28bea1@c-mercor.com"},
     "contractor g58b2d": {"name": "Brandon Evans", "email": "g58b2d103e8b0a86@c-mercor.com"},
     "hamilton adrian": {"name": "HAMILTON ADRIAN", "email": "g748044d6fa8c271@c-mercor.com"},
+    "m b": {"name": "Erich Mussak, MD", "email": "erich.nicholai@gmail.com"},
+    "erich mussak, md": {"name": "Erich Mussak, MD", "email": "erich.nicholai@gmail.com"},
+    "matthew haber": {"name": "Matthew Haber", "email": "matthew.a.haber@gmail.com"},
 }
 
 
@@ -88,6 +97,26 @@ def init_db():
         )
         """
     )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS authors (
+            name TEXT,
+            email TEXT,
+            contractor_email TEXT PRIMARY KEY,
+            position TEXT
+        )
+        """
+    )
+    try:
+        cur = conn.execute("PRAGMA table_info(authors)")
+        cols = [row[1] for row in cur.fetchall()]
+        if cols and "position" not in cols:
+            try:
+                conn.execute("ALTER TABLE authors ADD COLUMN position TEXT")
+            except sqlite3.OperationalError:
+                pass
+    except sqlite3.Error:
+        pass
     try:
         conn.execute("ALTER TABLE approvals_log ADD COLUMN original_author_email TEXT")
     except sqlite3.OperationalError:
@@ -165,6 +194,61 @@ def normalize_name(name: str) -> str:
     return " ".join(name.lower().split())
 
 
+def normalize_email(email: str) -> str:
+    return (email or "").strip().lower()
+
+
+def load_reviewer_lookup(csv_path: Path):
+    lookup = {"emails": set(), "contractor_emails": set(), "names": set()}
+    if not csv_path.exists():
+        return lookup
+    with csv_path.open(newline="", encoding="utf-8") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            name = normalize_name(row.get("Name") or "")
+            email = normalize_email(row.get("Email") or "")
+            contractor = normalize_email(row.get("Contractor Email") or "")
+            if name:
+                lookup["names"].add(name)
+            if email:
+                lookup["emails"].add(email)
+            if contractor:
+                lookup["contractor_emails"].add(contractor)
+    return lookup
+
+
+def upsert_authors_from_emails(conn, csv_path: Path) -> None:
+    if not csv_path.exists():
+        return
+    reviewer_lookup = load_reviewer_lookup(REVIEWER_CSV)
+    conn.execute("DELETE FROM authors")
+    with csv_path.open(newline="", encoding="utf-8") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            contractor_email = normalize_email(row.get("Contractor Email") or "")
+            if not contractor_email:
+                continue
+            name = (row.get("Name") or "").strip()
+            email = normalize_email(row.get("Email") or "")
+            is_reviewer = (
+                contractor_email in reviewer_lookup["contractor_emails"]
+                or email in reviewer_lookup["emails"]
+                or normalize_name(name) in reviewer_lookup["names"]
+            )
+            position = "Reviewer" if is_reviewer else "Writer"
+            conn.execute(
+                """
+                INSERT INTO authors (
+                    name,
+                    email,
+                    contractor_email,
+                    position
+                )
+                VALUES (?, ?, ?, ?)
+                """,
+                (name, email, contractor_email, position),
+            )
+
 def extract_contractor_code(name: str) -> str:
     if not name:
         return ""
@@ -193,6 +277,32 @@ def resolve_owner_name(task: dict) -> str:
         custom_owner = custom_fields.get(AUTHOR_CUSTOM_FIELD_ID)
         if isinstance(custom_owner, str) and custom_owner.strip():
             return custom_owner.strip()
+    return ""
+
+
+def extract_claiming_reviewer(task: dict) -> str:
+    custom_fields = task.get("custom_fields") or {}
+    if not isinstance(custom_fields, dict):
+        return ""
+    value = custom_fields.get(CLAIMING_REVIEWER_FIELD_ID)
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value.strip()
+    if isinstance(value, list):
+        cleaned = []
+        for item in value:
+            if isinstance(item, str) and item.strip():
+                cleaned.append(item.strip())
+            elif isinstance(item, dict):
+                candidate = item.get("name") or item.get("value")
+                if isinstance(candidate, str) and candidate.strip():
+                    cleaned.append(candidate.strip())
+        return ", ".join(cleaned)
+    if isinstance(value, dict):
+        candidate = value.get("name") or value.get("value")
+        if isinstance(candidate, str):
+            return candidate.strip()
     return ""
 
 
@@ -481,12 +591,17 @@ def main():
     tasks = payload.get("tasks", [])
     if not isinstance(tasks, list):
         raise SystemExit("Unexpected JSON shape: payload['tasks'] is not a list")
+    if tasks:
+        sample_count = min(4, len(tasks))
+        with open(OUT_TASK_SAMPLE, "w", encoding="utf-8") as f:
+            json.dump(tasks[:sample_count], f, indent=2)
     contractor_email_map = load_contractor_email_map(EMAILS_CSV)
     email_name_map = load_email_name_map(EMAILS_CSV)
+    conn = init_db()
+    upsert_authors_from_emails(conn, EMAILS_CSV)
     tasks = apply_name_overrides(tasks, email_name_map, contractor_email_map)
 
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-    conn = init_db()
     state = load_task_state(conn)
     approved_ids = load_approved_task_ids(conn)
     sheet_id, sheet_tab, creds_raw, backfill = load_sheet_config()
@@ -616,7 +731,9 @@ def main():
                 "has_gt_grade": t.get("has_gt_grade"),
                 "created_at": t.get("created_at"),
                 "updated_at": t.get("updated_at"),
+                "approved_at": t.get("approved_at"),
                 "task_id": task_id,
+                "claiming_reviewer": extract_claiming_reviewer(t),
             }
         )
 
