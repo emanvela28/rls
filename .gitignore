@@ -6,3 +6,5 @@ __pycache__/
 .DS_Store
 .env.*
 todo.txt
+scripts/sync_sheet_missing.py
+sync_sheet_missing.py

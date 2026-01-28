@@ -611,6 +611,11 @@ def main():
         with open(OUT_TASK_SAMPLE, "w", encoding="utf-8") as f:
             json.dump(tasks[:sample_count], f, indent=2)
     contractor_email_map = load_contractor_email_map(EMAILS_CSV)
+    contractor_name_map = {
+        normalize_name(info.get("name") or ""): info
+        for info in contractor_email_map.values()
+        if info.get("name")
+    }
     email_name_map = load_email_name_map(EMAILS_CSV)
     conn = init_db()
     upsert_authors_from_emails(conn, EMAILS_CSV)
@@ -679,6 +684,15 @@ def main():
                 approval_email = users_email_by_name.get(
                     normalize_name(approval_author), ""
                 )
+            if not approval_email:
+                contractor_match_by_name = contractor_name_map.get(
+                    normalize_name(approval_author)
+                )
+                if contractor_match_by_name:
+                    approval_author = contractor_match_by_name.get("name") or approval_author
+                    approval_email = contractor_match_by_name.get("email") or contractor_match_by_name.get(
+                        "contractor_email", ""
+                    )
             approved_at = t.get("approved_at") or t.get("updated_at") or ts
             append_approval_log(
                 conn,
