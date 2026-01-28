@@ -53,6 +53,9 @@ OVERRIDE_BY_NAME = {
     "m b": {"name": "Erich Mussak, MD", "email": "erich.nicholai@gmail.com"},
     "erich mussak, md": {"name": "Erich Mussak, MD", "email": "erich.nicholai@gmail.com"},
     "matthew haber": {"name": "Matthew Haber", "email": "matthew.a.haber@gmail.com"},
+    "dr. shah": {"name": "Summit Shah", "email": "pf4425cf2100bf8d@c-mercor.com"},
+    "dr.shah": {"name": "Summit Shah", "email": "pf4425cf2100bf8d@c-mercor.com"},
+    "dr shah": {"name": "Summit Shah", "email": "pf4425cf2100bf8d@c-mercor.com"},
 }
 
 
@@ -488,6 +491,18 @@ def apply_name_overrides(tasks: list, email_name_map: dict, contractor_email_map
             email = contractor_email_map[email].strip().lower()
             updated["owned_by_user_email"] = email
         name = (task.get("owned_by_user_name") or "").strip()
+
+        # If the name is "contractor <code>", resolve it via emails.csv.
+        if not email:
+            contractor_code = extract_contractor_code(name)
+            if contractor_code:
+                contractor_match = find_contractor_match_by_code(
+                    contractor_code, contractor_email_map
+                )
+                if contractor_match:
+                    updated["owned_by_user_name"] = contractor_match.get("name") or name
+                    updated["owned_by_user_email"] = contractor_match.get("email") or ""
+                    email = updated["owned_by_user_email"].strip().lower()
 
         if email and email in norm_email_map:
             updated["owned_by_user_name"] = norm_email_map[email]

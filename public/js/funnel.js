@@ -46,9 +46,27 @@ const OVERRIDE_BY_NAME = {
   "m b": { name: "Erich Mussak, MD", email: "medical61@c-mercor.com" },
   "erich mussak, md": { name: "Erich Mussak, MD", email: "medical61@c-mercor.com" },
   "matthew haber": { name: "Matthew Haber", email: "c1093c720d7223b4@c-mercor.com" },
+  "dr. shah": { name: "Summit Shah", email: "pf4425cf2100bf8d@c-mercor.com" },
+  "dr shah": { name: "Summit Shah", email: "pf4425cf2100bf8d@c-mercor.com" },
 };
 const normalizeEmail = (value) => (value || "").trim().toLowerCase();
 const normalizeName = (value) => (value || "").trim().toLowerCase().replace(/\s+/g, " ");
+const extractContractorCode = (value) => {
+  const normalized = normalizeName(value);
+  if (normalized.startsWith("contractor ")) {
+    return normalized.split(" ").slice(1).join(" ").trim();
+  }
+  return "";
+};
+const findContractorMatchByCode = (code, emailMap = {}) => {
+  if (!code) return "";
+  const target = code.toLowerCase();
+  return (
+    Object.keys(emailMap).find((email) =>
+      email.split("@")[0].toLowerCase().startsWith(target),
+    ) || ""
+  );
+};
 const PST_TIMEZONE = "America/Los_Angeles";
 const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: PST_TIMEZONE,
@@ -197,6 +215,15 @@ const applyTaskOverrides = (tasks, emailMap = {}) =>
     const normalizedEmail = normalizeEmail(task.owned_by_user_email);
     const normalizedName = normalizeName(task.owned_by_user_name);
     let updated = { ...task };
+
+    if (!normalizedEmail) {
+      const contractorCode = extractContractorCode(task.owned_by_user_name);
+      const matchedEmail = findContractorMatchByCode(contractorCode, emailMap);
+      if (matchedEmail) {
+        updated.owned_by_user_email = matchedEmail;
+        updated.owned_by_user_name = emailMap[matchedEmail] || updated.owned_by_user_name;
+      }
+    }
 
     // Priority: explicit email map from server
     if (normalizedEmail && emailMap[normalizedEmail]) {

@@ -61,6 +61,8 @@ OVERRIDE_BY_NAME = {
     "m b": {"name": "Erich Mussak, MD", "email": "medical61@c-mercor.com"},
     "erich mussak, md": {"name": "Erich Mussak, MD", "email": "medical61@c-mercor.com"},
     "matthew haber": {"name": "Matthew Haber", "email": "c1093c720d7223b4@c-mercor.com"},
+    "dr. shah": {"name": "Summit Shah", "email": "pf4425cf2100bf8d@c-mercor.com"},
+    "dr shah": {"name": "Summit Shah", "email": "pf4425cf2100bf8d@c-mercor.com"},
 }
 
 
@@ -110,6 +112,25 @@ def normalize_name_loose(value: str) -> str:
     if parts and parts[0] == "steve":
         parts[0] = "stephen"
     return " ".join(parts)
+
+
+def extract_contractor_code(name: str) -> str:
+    if not name:
+        return ""
+    lowered = name.strip().lower()
+    if lowered.startswith("contractor "):
+        return lowered.split(None, 1)[1].strip()
+    return ""
+
+
+def find_contractor_match_by_code(code: str, email_map: dict) -> tuple[str, str]:
+    if not code or not email_map:
+        return "", ""
+    for email, display in email_map.items():
+        local = email.split("@", 1)[0].lower()
+        if local.startswith(code.lower()):
+            return email, display
+    return "", ""
 
 
 def verify_token(
@@ -468,6 +489,18 @@ def apply_name_overrides(tasks: list, email_map: dict) -> list:
         name = (task.get("owned_by_user_name") or "").strip()
         email = (task.get("owned_by_user_email") or "").strip().lower()
         updated = dict(task)
+
+        if not email:
+            contractor_code = extract_contractor_code(name)
+            if contractor_code:
+                matched_email, matched_name = find_contractor_match_by_code(
+                    contractor_code, normalized_map
+                )
+                if matched_email:
+                    updated["owned_by_user_email"] = matched_email
+                if matched_name:
+                    updated["owned_by_user_name"] = matched_name
+                email = (updated.get("owned_by_user_email") or "").strip().lower()
 
         if email and email in normalized_map:
             updated["owned_by_user_name"] = normalized_map[email]
