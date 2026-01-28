@@ -19,6 +19,7 @@ PUBLIC_DIR = BASE_DIR / "public"
 DATA_DIR = BASE_DIR / "data"
 SRC_DIR = BASE_DIR / "src"
 DB_FILE = DATA_DIR / "tasks.db"
+OUT_SHEET_STATUS = DATA_DIR / "sheet_status.json"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
@@ -544,6 +545,11 @@ def reviewers():
     return FileResponse(PUBLIC_DIR / "reviewers.html", headers=NO_CACHE_HEADERS)
 
 
+@app.get("/analytics")
+def analytics():
+    return FileResponse(PUBLIC_DIR / "analytics.html", headers=NO_CACHE_HEADERS)
+
+
 @app.get("/config.js")
 def config_js():
     content = (
@@ -675,3 +681,52 @@ def api_scrape_status(payload=Depends(verify_token)):
         except Exception as exc:
             status["data_generated_at"] = f"error: {exc}"
     return status
+
+
+def parse_iso_ts(value: str) -> datetime | None:
+    if not value:
+        return None
+    try:
+        if value.endswith("Z"):
+            value = value[:-1] + "+00:00"
+        return datetime.fromisoformat(value)
+    except ValueError:
+        return None
+
+
+@app.get("/api/sheet-status")
+def api_sheet_status(payload=Depends(verify_token)):
+    sheet_status = {
+        "last_append_at": "",
+        "last_append_count": 0,
+        "last_error": "sheet_status.json not available.",
+    }
+    if OUT_SHEET_STATUS.exists():
+        try:
+            sheet_status = json.loads(OUT_SHEET_STATUS.read_text(encoding="utf-8"))
+        except Exception as exc:
+            sheet_status["last_error"] = f"sheet_status.json read failed: {exc}"
+
+    changelog_file = DATA_DIR / "changelog.json"
+    latest_approved_at = ""
+    approvals_after_last_append = 0
+    if changelog_file.exists():
+        try:
+            approvals = json.loads(changelog_file.read_text(encoding="utf-8"))
+            if approvals:
+                latest_approved_at = approvals[0].get("approved_at", "")
+            last_append_at = parse_iso_ts(sheet_status.get("last_append_at", ""))
+            if last_append_at:
+                approvals_after_last_append = sum(
+                    1
+                    for row in approvals
+                    if parse_iso_ts(row.get("approved_at", "")) and parse_iso_ts(row.get("approved_at", "")) > last_append_at
+                )
+        except Exception as exc:
+            sheet_status["last_error"] = f"changelog read failed: {exc}"
+
+    return {
+        "sheet_status": sheet_status,
+        "latest_approved_at": latest_approved_at,
+        "approvals_after_last_append": approvals_after_last_append,
+    }

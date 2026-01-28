@@ -25,6 +25,7 @@
           <div class="hero-actions__left">
             <a class="btn-ghost" href="/">Tasks</a>
             <a class="btn-ghost" href="/funnel">Funnel Tracking</a>
+            <a class="btn-ghost" href="/analytics">Analytics</a>
             <a class="btn-ghost btn-ghost--active" href="/authors">Authors</a>
             <a class="btn-ghost" href="/reviewers">Reviewers</a>
           </div>
@@ -40,18 +41,23 @@
             <span>Search Authors</span>
             <input id="authorSearch" type="search" placeholder="Name or email" />
           </label>
-          <div class="control">
-            <span>History</span>
-            <div class="chips" id="authorHistoryChips"></div>
+        </div>
+        <div class="filter-builder" id="authorFilterBuilder">
+          <div class="filter-builder__header">
+            <div>
+              <span class="filter-title">Filters</span>
+              <span class="filter-subtitle">Build rules like (A and B) or C.</span>
+            </div>
+            <div class="filter-builder__actions">
+              <button class="btn-ghost btn-ghost--compact" id="addFilterGroup" type="button">
+                Add group (OR)
+              </button>
+              <button class="btn-ghost btn-ghost--compact" id="clearFilterGroups" type="button">
+                Clear
+              </button>
+            </div>
           </div>
-          <div class="control">
-            <span>RLS</span>
-            <div class="chips" id="authorRlsChips"></div>
-          </div>
-          <div class="control">
-            <span>Role</span>
-            <div class="chips" id="authorRoleChips"></div>
-          </div>
+          <div class="filter-builder__groups" id="authorFilterGroups"></div>
         </div>
       </section>
 
