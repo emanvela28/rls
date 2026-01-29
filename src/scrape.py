@@ -684,6 +684,14 @@ def main():
                 approval_email = users_email_by_name.get(
                     normalize_name(approval_author), ""
                 )
+            contractor_match_by_email = None
+            if approval_email:
+                contractor_match_by_email = contractor_email_map.get(
+                    approval_email.lower()
+                )
+            if contractor_match_by_email:
+                approval_author = contractor_match_by_email.get("name") or approval_author
+                approval_email = contractor_match_by_email.get("email") or approval_email
             if not approval_email:
                 contractor_match_by_name = contractor_name_map.get(
                     normalize_name(approval_author)

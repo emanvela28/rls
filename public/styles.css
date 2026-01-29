@@ -610,8 +610,28 @@ body.modal-open {
   text-align: left;
 }
 
-.metrics-table--daily tbody tr.is-anchor {
-  background: #efe3ff;
+.metrics-table--daily {
+  border-collapse: separate;
+  border-spacing: 0 6px;
+}
+
+.metrics-table--daily tbody td {
+  border-bottom: none;
+  background: #ffffff;
+}
+
+.metrics-table--daily tbody tr.is-anchor td {
+  background: #f3ecff;
+}
+
+.metrics-table--daily tbody tr.is-anchor td:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.metrics-table--daily tbody tr.is-anchor td:last-child {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
 
 .metric-cell {

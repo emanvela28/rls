@@ -29,7 +29,7 @@ const STATUS_KEYS = {
   needsEdits: "needs edits",
 };
 
-let analyticsRange = "l14";
+let analyticsRange = "daily";
 let anchorDate = null;
 let tasks = [];
 let oldNewMap = {};
